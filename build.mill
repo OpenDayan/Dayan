@@ -1,0 +1,209 @@
+package build
+
+import os.write.over
+// import Mill dependency
+import mill._
+import mill.scalalib._
+import mill.scalalib.publish._
+import scalafmt._
+import mill.util._
+import mill.api.BuildCtx
+import coursier.maven.MavenRepository
+
+object v {
+  val chisel6 = "6.7.0"
+  val chisel7 = "7.9.0"
+  val chiselDefault = chisel7
+  val scalaVersions = Map(
+    chisel6 -> "2.13.16",
+    chisel7 -> "2.13.18"
+  )
+  val chiselCrossVersions = Map(
+    chisel6 -> (
+      mvn"org.chipsalliance::chisel:$chisel6",
+      mvn"org.chipsalliance:::chisel-plugin:$chisel6",
+      mvn"edu.berkeley.cs::chiseltest:6.0.0"
+    ),
+    chisel7 -> (
+      mvn"org.chipsalliance::chisel:$chisel7",
+      mvn"org.chipsalliance:::chisel-plugin:$chisel7",
+      mvn"edu.berkeley.cs::chiseltest:7.0.0"
+    )
+  )
+  val mainargs = mvn"com.lihaoyi::mainargs:0.5.0"
+  val json4sJackson = mvn"org.json4s::json4s-jackson:4.0.5"
+  def scalaReflectVersions = (v: String) =>
+    mvn"org.scala-lang:scala-reflect:${scalaVersions(v)}"
+  val sourcecode = mvn"com.lihaoyi::sourcecode:0.4.4"
+  val scalatest = mvn"org.scalatest::scalatest:3.2.19"
+}
+
+object `package` extends SbtModule with ScalafmtModule {
+  def chiselVersion = v.chiselDefault
+  def scalaVersion = v.scalaVersions(chiselVersion)
+  def chiselMvn = v.chiselCrossVersions(chiselVersion)._1
+  def chiselPluginMvn = v.chiselCrossVersions(chiselVersion)._2
+
+  trait CommonModule extends ScalaModule {
+    def scalaVersion = v.scalaVersions(chiselVersion)
+    def chiselModule = None
+    def chiselPluginJar = Task(None)
+    def chiselMvn = Some(v.chiselCrossVersions(chiselVersion)._1)
+    def chiselPluginMvn = Some(v.chiselCrossVersions(chiselVersion)._2)
+    def mvnDeps = Task(super.mvnDeps() ++ chiselMvn)
+    def scalacPluginMvnDeps = Task(
+      super.scalacPluginMvnDeps() ++ chiselPluginMvn.toSeq
+    )
+  }
+  trait CommonSbtModule extends CommonModule with SbtModule
+
+  object deps extends CommonModule {
+    object macros extends CommonModule {
+      def scalaReflectMvn = v.scalaReflectVersions(chiselVersion)
+    }
+
+    object `rocket-chip` extends CommonSbtModule {
+      override def mvnDeps = super.mvnDeps() ++ Seq(
+        v.json4sJackson,
+        v.mainargs
+      )
+
+      object dependencies extends CommonModule {
+        object hardfloat extends CommonModule {
+          object hardfloat extends CommonSbtModule
+        }
+        object cde extends CommonModule {
+          object cde extends CommonModule
+        }
+        object diplomacy extends CommonModule {
+          object diplomacy extends CommonModule {
+            override def moduleDeps = super.moduleDeps ++ Seq(cde.cde)
+            override def mvnDeps = super.mvnDeps() ++ Seq(v.sourcecode)
+          }
+        }
+      }
+
+      override def moduleDeps = super.moduleDeps ++ Seq(
+        macros,
+        dependencies.hardfloat.hardfloat,
+        dependencies.cde.cde,
+        dependencies.diplomacy.diplomacy
+      )
+    }
+
+    object `rocket-chip-blocks` extends CommonSbtModule {
+      override def moduleDeps = super.moduleDeps ++ Seq(`rocket-chip`)
+    }
+
+    object testchipip extends CommonSbtModule {
+
+      override def moduleDeps =
+        super.moduleDeps ++ Seq(`rocket-chip-blocks`)
+    }
+
+    object RVTNG extends CommonSbtModule {
+      override def moduleDeps =
+        super.moduleDeps ++ Seq(
+          `rocket-chip`.dependencies.hardfloat.hardfloat,
+          LaomaSubsystem
+        )
+    }
+
+    object LaomaSubsystem extends CommonSbtModule {
+      object `xs-utils` extends CommonSbtModule {
+        override def moduleDeps =
+          super.moduleDeps ++ Seq(`rocket-chip`)
+        override def scalacOptions =
+          super.scalacOptions() ++ Seq("-Ymacro-annotations", "-Ytasty-reader")
+        override def allSourceFiles = Task {
+          super
+            .allSourceFiles()
+            .filter { pr => pr.path.toString.contains("src/main/scala") }
+            .filterNot { pr =>
+              pr.path.toString.contains(
+                "src/main/scala/xs/utils/debug/HardwareAssertion.scala"
+              ) ||
+              pr.path.toString.contains(
+                "src/main/scala/xs/utils/cache"
+              )
+            }
+        }
+      }
+      override def moduleDeps =
+        super.moduleDeps ++ Seq(`xs-utils`)
+    }
+
+    object `pcie-interrupt-handler` extends CommonSbtModule {
+      override def moduleDeps = super.moduleDeps ++ Seq(`rocket-chip`)
+      override def mvnDeps = super.mvnDeps() ++ Seq(v.scalatest)
+    }
+
+    object difftest extends CommonSbtModule
+
+    object WiredRV extends CommonSbtModule {
+      override def moduleDeps =
+        super.moduleDeps ++ Seq(LaomaSubsystem, difftest)
+    }
+  }
+
+  override def forkArgs = super.forkArgs() ++ Seq("-Xmx24G")
+
+  override def moduleDeps =
+    super.moduleDeps ++ Seq(
+      deps.testchipip,
+      deps.`rocket-chip`,
+      deps.LaomaSubsystem,
+      deps.RVTNG,
+      deps.`pcie-interrupt-handler`,
+      deps.WiredRV
+    )
+  def mvnDeps = Seq(chiselMvn)
+  def scalacPluginMvnDeps = Seq(chiselPluginMvn)
+
+  override def scalacOptions =
+    super.scalacOptions() ++ Seq(
+      "-Ymacro-annotations" // https://www.chisel-lang.org/docs/cookbooks/hierarchy#using-definition-and-instance
+    )
+
+  def genTop = Task.Input { sys.props.getOrElse("top", "") }
+  def genConfig = Task.Input { sys.props.getOrElse("config", "") }
+  def genReplSeqMem = Task.Input { sys.props.getOrElse("repl-seq-mem", "") }
+  def gen = Task {
+    val top = genTop()
+    val config = genConfig()
+    val replSeqMem = genReplSeqMem()
+    if (top == "" || config == "") {
+      Task.log.error(
+        "Please provide output directory and config name via top and config"
+      )
+      sys.exit(1)
+    }
+    Task.log.info(s"Current config: ${config}, top: ${top}")
+    Task.log.info(s"Generating Verilog...")
+    val argMap =
+      Map(
+        "--top" -> top,
+        "--config" -> config,
+        "--repl-seq-mem" -> replSeqMem
+      )
+    BuildCtx.withFilesystemCheckerDisabled {
+      Jvm.callProcess(
+        mainClass = "rvtsoc.Main",
+        classPath = runClasspath().map(_.path),
+        mainArgs = argMap
+          .filter(kv => kv._2.nonEmpty)
+          .toSeq
+          .flatMap(kv => Seq(kv._1, kv._2)),
+        cwd = BuildCtx.workspaceRoot,
+        stdout = os.Inherit,
+        stderr = os.Inherit
+      )
+    }
+  }
+
+  object test extends SbtTests with TestModule.ScalaTest {
+    override def mvnDeps = super.mvnDeps() ++ Seq(v.scalatest)
+    override def forkArgs = super.forkArgs()
+    def testFramework = "org.scalatest.tools.Framework"
+  }
+}

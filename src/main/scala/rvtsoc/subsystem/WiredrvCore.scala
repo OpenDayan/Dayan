@@ -1,0 +1,38 @@
+package rvtsoc.subsystem
+
+import chisel3._
+import chisel3.util._
+
+import org.chipsalliance.cde.config
+import org.chipsalliance.cde.config.Parameters
+import org.chipsalliance.diplomacy.lazymodule._
+
+import wiredrv.WiredCore
+import wiredrv.CoreParams
+
+import lmss.axi.AxiBundle
+
+import rvtsoc.config.WiredrvParamsKey
+
+class WiredrvCore(implicit p: config.Parameters) extends BaseScalarCore {
+
+  implicit val coreParams: CoreParams = p(WiredrvParamsKey).get
+  val wiredCore = Module(new WiredCore)
+
+  wiredCore.io.inst.ready := true.B
+
+  wiredCore.io.hartId := io.hartId
+  wiredCore.io.mtip := io.mtip
+  wiredCore.io.msip := io.msip
+  wiredCore.io.meip := io.meip
+  wiredCore.io.debug := io.debug
+  wiredCore.io.time := io.time
+
+  wiredCore.io.clusterInterrupt := false.B
+
+  require(
+    io.m_axi.params.idBits >= wiredCore.io.mem.params.idBits,
+    "io.m_axi.params.idBits >= wiredCore.io.mem.params.idBits"
+  )
+  io.m_axi <> wiredCore.io.mem
+}

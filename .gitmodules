@@ -1,0 +1,24 @@
+[submodule "deps/rocket-chip"]
+	path = deps/rocket-chip
+	url = https://github.com/OpenXiangShan-Nanhu/rocket-chip.git
+[submodule "deps/testchipip"]
+	path = deps/testchipip
+	url = https://github.com/ucb-bar/testchipip.git
+[submodule "deps/rocket-chip-blocks"]
+	path = deps/rocket-chip-blocks
+	url = https://github.com/chipsalliance/rocket-chip-blocks.git
+[submodule "deps/RVTNG"]
+	path = deps/RVTNG
+	url = https://git.rvnpu.cn/rvtng-hw/RVTNG.git
+[submodule "deps/LaomaSubsystem"]
+	path = deps/LaomaSubsystem
+	url = https://git.rvnpu.cn/rvnpu/LaomaSubsystem.git
+[submodule "deps/pcie-interrupt-handler"]
+	path = deps/pcie-interrupt-handler
+	url = https://git.rvnpu.cn/rvnpu/pcie-interrupt-handler
+[submodule "deps/WiredRV"]
+	path = deps/WiredRV
+	url = https://git.rvnpu.cn/rvnpu/WiredRV.git
+[submodule "deps/difftest"]
+	path = deps/difftest
+	url = https://github.com/OpenXiangShan-Nanhu/difftest

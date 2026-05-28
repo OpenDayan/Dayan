@@ -1,0 +1,42 @@
+
+hello.elf:     file format elf64-littleriscv
+
+Contents of section .text:
+ 80000000 732540f1 93020000 631c5500 17050000  s%@.....c.U.....
+ 80000010 13050504 ef004001 13000000 6ff0dfff  ......@.....o...
+ 80000020 13000000 6ff0dfff 93020500 03c30200  ....o...........
+ 80000030 630c0300 b7036040 9b834300 23a06300  c.....`@..C.#.c.
+ 80000040 93821200 6ff09ffe 67800000           ....o...g...    
+Contents of section .rodata:
+ 8000004c 48656c6c 6f20576f 726c6421 0a00      Hello World!..  
+Contents of section .riscv.attributes:
+ 0000 414c0000 00726973 63760001 42000000  AL...riscv..B...
+ 0010 05727636 34693270 315f6d32 70305f61  .rv64i2p1_m2p0_a
+ 0020 3270315f 7a696373 72327030 5f7a6d6d  2p1_zicsr2p0_zmm
+ 0030 756c3170 305f7a61 616d6f31 70305f7a  ul1p0_zaamo1p0_z
+ 0040 616c7273 63317030 0008010a 0b        alrsc1p0.....   
+
+Disassembly of section .text:
+
+0000000080000000 <_start>:
+    80000000:	f1402573          	csrr	a0,mhartid
+    80000004:	00000293          	li	t0,0
+    80000008:	00551c63          	bne	a0,t0,80000020 <_start+0x20>
+    8000000c:	00000517          	auipc	a0,0x0
+    80000010:	04050513          	addi	a0,a0,64 # 8000004c <uart_print+0x24>
+    80000014:	014000ef          	jal	80000028 <uart_print>
+    80000018:	00000013          	nop
+    8000001c:	ffdff06f          	j	80000018 <_start+0x18>
+    80000020:	00000013          	nop
+    80000024:	ffdff06f          	j	80000020 <_start+0x20>
+
+0000000080000028 <uart_print>:
+    80000028:	00050293          	mv	t0,a0
+    8000002c:	0002c303          	lbu	t1,0(t0)
+    80000030:	00030c63          	beqz	t1,80000048 <uart_print+0x20>
+    80000034:	406003b7          	lui	t2,0x40600
+    80000038:	0043839b          	addiw	t2,t2,4 # 40600004 <_start-0x3f9ffffc>
+    8000003c:	0063a023          	sw	t1,0(t2)
+    80000040:	00128293          	addi	t0,t0,1
+    80000044:	fe9ff06f          	j	8000002c <uart_print+0x4>
+    80000048:	00008067          	ret

@@ -181,7 +181,7 @@ void test_thread_entry() {
   // load hello_multicore.bin into DRAM at 0x80000000
   {
     const std::filesystem::path bin_path =
-        "src/software/helloworld/hello_multicore.bin";
+        "src/software/helloworld/hello.bin";
     std::ifstream bin_file(bin_path, std::ios::binary | std::ios::ate);
     if (!bin_file) {
       logger->error("Failed to open binary: {}", bin_path.string());

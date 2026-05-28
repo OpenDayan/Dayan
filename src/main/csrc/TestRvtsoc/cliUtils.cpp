@@ -121,7 +121,7 @@ static inline void run_next_cycle_abstract(uint64_t n) {
         n = 2;
     }
     printf("执行 run_next_cycle(%ld)\n", n);
-    run_next_cycle(n);
+    run_next_cycle(n, true);
 }
 
 // static inline void run_until_empty_abstract(void) {

@@ -29,9 +29,9 @@ class AXI4SlaveDPIAWW(params: AXI4BundleParameters) extends HasExtModuleInline {
   })
 
   val awFuncName =
-    s"AXI4SlaveDPIAW_${params.idBits}_${params.addrBits}_${params.lenBits}_${params.sizeBits}_${params.burstBits}_tick"
+    s"AXI4SlaveDPIAW_${params.dataBits}_tick"
   val wFuncName =
-    s"AXI4SlaveDPIW_${params.dataBits}_${params.dataBits / 8}_tick"
+    s"AXI4SlaveDPIW_${params.dataBits}_tick"
 
   setInline(
     s"AXI4SlaveDPIAWW.sv",
@@ -106,7 +106,7 @@ class AXI4SlaveDPIB(params: AXI4BundleParameters) extends HasExtModuleInline {
   val id = IO(Output(UInt(params.idBits.W)))
   val resp = IO(Output(UInt(2.W)))
 
-  val funcName = s"AXI4SlaveDPIB_${params.idBits}_${params.respBits}_tick"
+  val funcName = s"AXI4SlaveDPIB_${params.dataBits}_tick"
   setInline(
     s"AXI4SlaveDPIB.sv",
     s"""
@@ -157,7 +157,7 @@ class AXI4SlaveDPIAR(params: AXI4BundleParameters) extends HasExtModuleInline {
   val burst = IO(Input(UInt(params.burstBits.W)))
 
   val funcName =
-    s"AXI4SlaveDPIAR_${params.idBits}_${params.addrBits}_${params.lenBits}_${params.sizeBits}_${params.burstBits}_tick"
+    s"AXI4SlaveDPIAR_${params.dataBits}_tick"
   setInline(
     s"AXI4SlaveDPIAR.sv",
     s"""
@@ -207,7 +207,7 @@ class AXI4SlaveDPIR(params: AXI4BundleParameters) extends HasExtModuleInline {
   val last = IO(Output(Bool()))
 
   val funcName =
-    s"AXI4SlaveDPIR_${params.idBits}_${params.dataBits}_${params.respBits}_tick"
+    s"AXI4SlaveDPIR_${params.dataBits}_tick"
   setInline(
     s"AXI4SlaveDPIR.sv",
     s"""
@@ -259,6 +259,13 @@ class AXI4SlaveDPIR(params: AXI4BundleParameters) extends HasExtModuleInline {
 }
 
 class AXI4SlaveDPI(params: AXI4BundleParameters) extends Module {
+  require(params.idBits <= 32)
+  require(params.addrBits <= 64)
+  require(params.lenBits <= 32)
+  require(params.sizeBits <= 32)
+  require(params.burstBits <= 32)
+  require(params.dataBits / 8 <= 64)
+
   val axi = IO(Flipped(new AXI4Bundle(params)))
 
   val aww = Module(new AXI4SlaveDPIAWW(params))
@@ -306,6 +313,8 @@ class AXI4SlaveDPI(params: AXI4BundleParameters) extends Module {
   axi.r.bits.resp := r.resp
   axi.r.bits.last := r.last
 
+  ExtraFiles.add("src/main/csrc/devices/ddr4.cpp")
+  ExtraFiles.addIncludePath("src/main/csrc")
 }
 
 import rvtng.bus.DPIAXI4

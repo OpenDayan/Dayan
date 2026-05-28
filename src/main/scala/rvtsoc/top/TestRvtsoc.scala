@@ -34,7 +34,7 @@ class TestRvtsoc(implicit p: Parameters) extends Module {
   )
   utils.connectAxi(soc.s_axi, axiMasterDPI.axi)
   val axiSlaveDPI = Module(
-    new AXI4SlaveDPILegacy(
+    new AXI4SlaveDPI(
       AXI4BundleParameters(
         addrBits = extAxip.addrBits,
         dataBits = extAxip.dataBits,

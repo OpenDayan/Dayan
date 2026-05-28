@@ -76,18 +76,19 @@ void sigint_handler(int signum) {
   std::cerr << strsignal(signum) << "!" << std::endl;
   exit(signum);
 }
-void run_next_cycle(uint64_t n) {
+
+void run_next_cycle(uint64_t n, bool print_progress) {
   static double npu_time = 0;
   static double dram_time = 0;
   unsigned long realN = n;
   for (unsigned long i = 0; i < realN;) {
     top->clock = 1;
-    // DDR4::tick();
-    // npu_time += npu_cycle;
-    // while(npu_time > dram_time) {
-    // DDR4::tick();
-    // dram_time += dram_cycle;
-    // }
+    DDR4Mod.tick();
+    npu_time += npu_cycle;
+    while (npu_time > dram_time) {
+      DDR4Mod.tick();
+      dram_time += dram_cycle;
+    }
     top->eval();
 #if VM_TRACE
     if (enable_waveform)
@@ -102,57 +103,34 @@ void run_next_cycle(uint64_t n) {
       m_trace->dump(contextp->time() - dump_offset);
 #endif
     contextp->timeInc(1);
-    print_progress_with_speed_multithread(++i, realN, 0);
-    if (stopFlag != 0) {
-      if ((--stopFlag) == 1)
-        break;
+
+    i++;
+    if (print_progress) {
+      print_progress_with_speed_multithread(i, realN, 0);
+
+      if (stopFlag != 0) {
+        if ((--stopFlag) == 1)
+          break;
+      }
     }
   }
-  print_progress_with_speed_multithread(realN, realN, 0);
-  wait_for_render_completion();
-  if (!stopFlag) {
-    printf("\033[42;32mVerilator: Simulator Run Next Cycle Success!\033[0m\n");
-  } else {
-    printf("\033[41;32mVerilator: Simulator Run Next Cycle FAILED!\033[0m\n");
+
+  if (print_progress) {
+    print_progress_with_speed_multithread(realN, realN, 0);
+    wait_for_render_completion();
+    if (!stopFlag) {
+      printf(
+          "\033[42;32mVerilator: Simulator Run Next Cycle Success!\033[0m\n");
+    } else {
+      printf("\033[41;32mVerilator: Simulator Run Next Cycle FAILED!\033[0m\n");
+    }
+    stopFlag = 0;
   }
-  stopFlag = 0;
-}
-
-void run_next_cycle() {
-  static double npu_time = 0;
-  static double dram_time = 0;
-  top->clock = 1;
-  // DDR4::tick();
-  // npu_time += npu_cycle;
-  // while(npu_time > dram_time) {
-  // DDR4::tick();
-  // dram_time += dram_cycle;
-  // }
-
-  top->eval();
-
-  // if (top->io_uart_out_valid) {
-  //   putchar(top->io_uart_out_ch);
-  // }
-
-#if VM_TRACE
-  if (enable_waveform)
-    m_trace->dump(contextp->time() - dump_offset);
-#endif
-  contextp->timeInc(1);
-  top->clock = 0;
-  top->eval();
-
-#if VM_TRACE
-  if (enable_waveform)
-    m_trace->dump(contextp->time() - dump_offset);
-#endif
-  contextp->timeInc(1);
 }
 
 void run_until_success() {
   while ((!top->io_success) && (contextp->time() < max_cycle) && (!stopFlag)) {
-    run_next_cycle();
+    run_next_cycle(1, false);
   }
   stopFlag = 0;
 }
@@ -193,7 +171,7 @@ void test_thread_entry() {
   const uint64_t boot_addr_base = 0x1000;
 
   const uint64_t clint_base = 0x20000;
-  const size_t n_cores = 4;
+  const size_t n_cores = 1;
 
   // test Bootrom
   logger->info(
@@ -275,7 +253,8 @@ int main(int argc, char **argv) {
   // dramsim3
   logger->info("DRAMSim3 Config File: {}", ddr_config_file);
   auto ddr_config = dramsim3::Config(ddr_config_file, log_path);
-  DPIAXI4InitMem(ddr_config);
+  // DPIAXI4InitMem(ddr_config);
+  DDR4Mod.init(ddr_config);
 
   // init_ram("/dev/zero", DEFAULT_EMU_RAM_SIZE);
 
@@ -314,7 +293,7 @@ int main(int argc, char **argv) {
     contextp->timeInc(1);
   }
   top->reset = 0;
-  run_next_cycle();
+  run_next_cycle(1, false);
 
   logger->info("Starting main CLI loop...");
   std::thread test_thread(test_thread_entry);

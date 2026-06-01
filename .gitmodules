@@ -7,9 +7,6 @@
 [submodule "deps/rocket-chip-blocks"]
 	path = deps/rocket-chip-blocks
 	url = https://github.com/chipsalliance/rocket-chip-blocks.git
-[submodule "deps/RVTNG"]
-	path = deps/RVTNG
-	url = https://git.rvnpu.cn/rvtng-hw/RVTNG.git
 [submodule "deps/LaomaSubsystem"]
 	path = deps/LaomaSubsystem
 	url = https://git.rvnpu.cn/rvnpu/LaomaSubsystem.git
@@ -22,3 +19,6 @@
 [submodule "deps/difftest"]
 	path = deps/difftest
 	url = https://github.com/OpenXiangShan-Nanhu/difftest
+[submodule "deps/rvt"]
+	path = deps/rvt
+	url = https://git.rvnpu.cn/rvnpu/rvt.git

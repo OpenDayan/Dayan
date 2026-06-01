@@ -90,13 +90,13 @@ class BaseRvtngCore(implicit p: config.Parameters) extends Module {
 class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
 
   val matParams = p(RvtngParamsKey).get.matParams
-  val dmaParams = p(RvtngParamsKey).get.dmaParams
   val vecParams = p(RvtngParamsKey).get.vecParams
+  val dmaParams = p(RvtngParamsKey).get.dmaParams
+  val vpuParams = p(RvtngParamsKey).get.vpuParams
   val tlParms = p(RvtngParamsKey).get.tlParms
-  val uramParams = p(RvtngParamsKey).get.uramParams
 
   val rvtng = Module(
-    new RVTNGTop(matParams, dmaParams, vecParams, tlParms, uramParams)
+    new RVTNGTop(matParams, vecParams, dmaParams, vpuParams, tlParms)
   )
 
   class Axi2Tl(implicit p: Parameters) extends LazyModule {
@@ -192,7 +192,7 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
 
   rvtng.instReq <> io.instReq
   io.instResp <> rvtng.instResp
-  utils.connectAxi(io.m_axi, rvtng.axi4.get)
+  utils.connectAxi(io.m_axi, rvtng.axi4)
   axi2Tl.io.axi <> io.s_axi
 }
 

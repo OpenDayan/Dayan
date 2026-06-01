@@ -5,17 +5,17 @@ import chisel3.util._
 
 import org.chipsalliance.cde.config._
 
-import rvtng.neovec.VecParams
+import rvtng.vec.VecParams
 import rvtng.neomat.MatParams
 import rvtng.dma.DMAParams
-import rvtng.neouram.URAMParms
 import rvtng.bus.TLBundleParameters
+import rvtng.vpu._
 
 case class RvtngParams(
     matParams: MatParams = MatParams(cM = 16, cN = 8, cK = 32), // 8T @ 1G
-    dmaParams: DMAParams = DMAParams(),
     vecParams: VecParams = VecParams(),
-    uramParams: URAMParms = URAMParms()
+    dmaParams: DMAParams = DMAParams(),
+    vpuParams: VpuParams = VpuParams(),
 ) {
   val tlParms = TLBundleParameters(
     addressBits = dmaParams.addressBits,

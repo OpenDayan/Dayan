@@ -101,7 +101,7 @@ object `package` extends SbtModule with ScalafmtModule {
         super.moduleDeps ++ Seq(`rocket-chip-blocks`)
     }
 
-    object RVTNG extends CommonSbtModule {
+    object rvt extends CommonSbtModule {
       override def moduleDeps =
         super.moduleDeps ++ Seq(
           `rocket-chip`.dependencies.hardfloat.hardfloat,
@@ -153,7 +153,7 @@ object `package` extends SbtModule with ScalafmtModule {
       deps.testchipip,
       deps.`rocket-chip`,
       deps.LaomaSubsystem,
-      deps.RVTNG,
+      deps.rvt,
       deps.`pcie-interrupt-handler`,
       deps.WiredRV
     )

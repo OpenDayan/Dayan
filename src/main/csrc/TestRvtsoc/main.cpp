@@ -41,9 +41,18 @@ std::shared_ptr<VerilatedFstC> m_trace = nullptr;
 std::unique_ptr<std::thread> fuse_thread;
 static uint64_t dump_offset;
 bool is_shutting_down = false;
-const size_t max_cycle = 100'000;
+const size_t max_cycle = 100'000'000;
+
+const uint64_t bootrom_base = 0x10000;
+const size_t bootrom_size = 0xc0;
+
+const uint64_t boot_addr_base = 0x1000;
+
+const uint64_t clint_base = 0x20000;
+const size_t n_cores = 1;
 
 void shutdown() {
+  signal(SIGSEGV, nullptr);
   logger->info("Try to Shutting down simulation...");
   is_shutting_down = true;
 #if VM_TRACE
@@ -128,9 +137,33 @@ void run_next_cycle(uint64_t n, bool print_progress) {
   }
 }
 
+auto get_now() {
+  return std::chrono::time_point_cast<std::chrono::milliseconds>(
+             std::chrono::system_clock::now())
+      .time_since_epoch()
+      .count();
+}
+
 void run_until_success() {
-  while ((!top->io_success) && (contextp->time() < max_cycle) && (!stopFlag)) {
+  uint64_t current_sim_time;
+  logger->info("Max cycle: {}", max_cycle);
+  while ((!top->io_success) &&
+         ((current_sim_time = contextp->time()) < max_cycle) && (!stopFlag)) {
     run_next_cycle(1, false);
+    if ((current_sim_time & (4096 - 1)) == 0) {
+      static uint64_t last_sim_time = 0;
+      static auto last = get_now();
+      auto now = get_now();
+      if (now - last) {
+        logger->info("Running: {} Hz", (current_sim_time - last_sim_time) *
+                                           1000 / 2 / (now - last));
+      }
+      last_sim_time = current_sim_time;
+      last = now;
+    }
+  }
+  if ((current_sim_time = contextp->time()) >= max_cycle) {
+    logger->info("Max cycle reached: {}", max_cycle);
   }
   stopFlag = 0;
 }
@@ -165,14 +198,6 @@ void dump_waveform(void) {
 }
 
 void test_thread_entry() {
-  const uint64_t bootrom_base = 0x10000;
-  const size_t bootrom_size = 0xc0;
-
-  const uint64_t boot_addr_base = 0x1000;
-
-  const uint64_t clint_base = 0x20000;
-  const size_t n_cores = 1;
-
   // test Bootrom
   logger->info(
       "Read Bootrom: {}",
@@ -180,8 +205,7 @@ void test_thread_entry() {
 
   // load hello_multicore.bin into DRAM at 0x80000000
   {
-    const std::filesystem::path bin_path =
-        "src/software/helloworld/hello.bin";
+    const std::filesystem::path bin_path = "src/software/helloworld/hello.bin";
     std::ifstream bin_file(bin_path, std::ios::binary | std::ios::ate);
     if (!bin_file) {
       logger->error("Failed to open binary: {}", bin_path.string());
@@ -277,27 +301,14 @@ int main(int argc, char **argv) {
 
   top->reset = 1;
   for (size_t i = 0; i < reset_cycles && !contextp->gotFinish(); i++) {
-    top->clock = 1;
-    top->eval();
-#if VM_TRACE
-    if (enable_waveform)
-      m_trace->dump(contextp->time() - dump_offset);
-#endif
-    contextp->timeInc(1);
-    top->clock = 0;
-    top->eval();
-#if VM_TRACE
-    if (enable_waveform)
-      m_trace->dump(contextp->time() - dump_offset);
-#endif
-    contextp->timeInc(1);
+    run_next_cycle(1, false);
   }
   top->reset = 0;
   run_next_cycle(1, false);
 
   logger->info("Starting main CLI loop...");
-  std::thread test_thread(test_thread_entry);
-  test_thread.detach();
+  // std::thread test_thread(test_thread_entry);
+  // test_thread.detach();
   cli_main();
   // run_until_success();
   for (int tryI = 0; true; tryI++) {

@@ -65,6 +65,8 @@ class BaseScalarCore(implicit p: config.Parameters) extends Module {
     val meip = Input(Bool())
     val debug = Input(Bool())
     val time = Input(ValidIO(UInt(64.W)))
+    val tensorInst = Decoupled(new TensorInst)
+    val tensorResp = Flipped(Decoupled(new TensorResp))
   })
 }
 
@@ -238,8 +240,8 @@ class NpuCore(implicit p: Parameters) extends BaseNpuCore {
   scalarCore.io.time := io.time
 
   tensorCore.io.hartId := io.hartId
-  tensorCore.io.instReq <> DontCare
-  tensorCore.io.instResp <> DontCare
+  tensorCore.io.instReq <> scalarCore.io.tensorInst
+  scalarCore.io.tensorResp <> tensorCore.io.instResp
 
   tensorCore.io.s_axi <> io.s_axi_tensor
   io.m_axi_tensor <> tensorCore.io.m_axi

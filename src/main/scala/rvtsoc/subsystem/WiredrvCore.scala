@@ -30,6 +30,12 @@ class WiredrvCore(implicit p: config.Parameters) extends BaseScalarCore {
 
   wiredCore.io.clusterInterrupt := false.B
 
+  wiredCore.io.tensorInst <> io.tensorInst
+  io.tensorResp <> wiredCore.io.tensorResp
+
+  wiredCore.io.ramctl := DontCare
+  wiredCore.io.dft <> DontCare
+
   require(
     io.m_axi.params.idBits >= wiredCore.io.mem.params.idBits,
     "io.m_axi.params.idBits >= wiredCore.io.mem.params.idBits"

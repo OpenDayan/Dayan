@@ -76,6 +76,6 @@ class RvtsocConfig
     extends Config(
       new NpuCoreConfig ++
         new WiredrvConfig ++
-        // new RvtngConfig ++
+        new RvtngConfig ++
         new BaseConfig
     )

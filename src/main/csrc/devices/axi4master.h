@@ -48,7 +48,7 @@ public:
   }
 
   void init() {
-    logger->set_level(spdlog::level::info);
+    logger->set_level(spdlog::level::warn);
     logger->set_formatter(std::move(make_sim_formatter()));
     logger->info("initialized");
   }

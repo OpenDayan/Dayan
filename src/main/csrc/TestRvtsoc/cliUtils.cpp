@@ -447,7 +447,7 @@ void reset_stdin() {
 int cli_main() {
     char input[MAX_LINE_LENGTH];
 
-    printf("=================== RVTNG CLI Shell ===================\n");
+    printf("=================== RVT CLI Shell ===================\n");
     printf("输入 'quit' 或 'exit' 退出 Shell\n");
     printf("输入 'help' 显示帮助信息\n");
     printf("使用 ↑/↓ 键浏览历史命令\n\n");

@@ -50,7 +50,7 @@ set(C_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 file(GLOB_RECURSE C_SOURCES ${C_SRC_DIR}/*.cpp ${C_SRC_DIR}/*.h)
 
 # cpp
-set(DRAMSIM3_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../deps/RVTNG/csrc/DRAMsim3)
+set(DRAMSIM3_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../deps/rvt/csrc/DRAMsim3)
 add_subdirectory(${DRAMSIM3_DIR} ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/dramsim3.dir EXCLUDE_FROM_ALL)
 
 add_executable(${TOP_NAME} ${C_SOURCES})

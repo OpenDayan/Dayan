@@ -57,5 +57,6 @@ class TestRvtsoc(implicit p: Parameters) extends Module {
 
   ExtraFiles.add("src/main/csrc/TestRvtsoc/cliUtils.cpp")
   ExtraFiles.add("src/main/csrc/TestRvtsoc/main.cpp")
+  ExtraFiles.add("src/main/csrc/devices/uram.cpp")
   ExtraFiles.addIncludePath("src/main/csrc/TestRvtsoc")
 }

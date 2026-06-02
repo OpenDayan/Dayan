@@ -13,7 +13,7 @@ SUBMODULES_MAP = {
     "deps/LaomaSubsystem": [
         "xs-utils",
     ],
-    "deps/RVTNG": [
+    "deps/rvt": [
         "csrc/DRAMsim3",
     ],
 }

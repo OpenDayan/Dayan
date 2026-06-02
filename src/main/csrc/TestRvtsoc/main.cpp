@@ -29,7 +29,7 @@ const std::filesystem::path log_path = "logs";
 const std::filesystem::path fst_log_file = log_path / "TestRvtsoc.fst";
 
 const std::string default_ddr_config =
-    "../deps/RVTNG/csrc/DRAMsim3/configs/DDR4_8Gb_x8_2400.ini";
+    "../deps/rvt/csrc/DRAMsim3/configs/DDR4_8Gb_x8_2400.ini";
 const std::string default_mount_point = "/tmp/virtual_npu";
 
 std::shared_ptr<spdlog::logger> logger = nullptr;

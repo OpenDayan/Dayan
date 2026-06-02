@@ -14,8 +14,8 @@ case class BootAddrRegParams(
 )
 case object BootAddrRegKey extends Field[Option[BootAddrRegParams]](None)
 
-class BootAddrReg(params: BootAddrRegParams, beatBytes: Int)(implicit
-    p: Parameters
+class BootAddrReg(params: BootAddrRegParams, beatBytes: Int, nCores: Int)(
+    implicit p: Parameters
 ) extends LazyModule {
 
   val device = new SimpleDevice("boot-address-reg", Nil)
@@ -29,8 +29,28 @@ class BootAddrReg(params: BootAddrRegParams, beatBytes: Int)(implicit
 
   lazy val module = new Impl
   class Impl extends LazyModuleImp(this) {
-    val bootAddrReg = RegInit(params.defaultBootAddress.U(64.W))
-    node.regmap(0 -> RegField.bytes(bootAddrReg))
-  }
+    val regWidth = 64
 
+    val bootAddrRegs = Seq.fill(nCores) {
+      RegInit(params.defaultBootAddress.U(regWidth.W))
+    }
+
+    node.regmap(
+      0 -> RegFieldGroup(
+        "boot-address",
+        Some("boot-address-reg"),
+        bootAddrRegs.zipWithIndex.flatMap { case (r, i) =>
+          RegField(
+            regWidth,
+            r,
+            RegFieldDesc(
+              s"boot-address-$i",
+              s"Boot Address for Hart $i",
+              reset = Some(params.defaultBootAddress)
+            )
+          ) :: Nil
+        }
+      )
+    )
+  }
 }

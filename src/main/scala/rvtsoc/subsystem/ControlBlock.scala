@@ -156,7 +156,7 @@ class ControlBlock(implicit p: Parameters) extends LazyModule with HasDTS {
   }
 
   val bootAddrReg = p(BootAddrRegKey).map { params =>
-    val reg = LazyModule(new BootAddrReg(params, controlAxip.dataBits / 8))
+    val reg = LazyModule(new BootAddrReg(params, controlAxip.dataBits / 8, nCores))
     reg.node := xbar.node
     reg
   }

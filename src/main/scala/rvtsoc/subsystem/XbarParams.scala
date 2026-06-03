@@ -20,6 +20,7 @@ case class XbarParams(
 
     frontDataBits: Int = 512,
     scalarDataBits: Int = 64,
+    uramDataBits: Int = 256,
     tensorDataBits: Int = 512,
     controlDataBits: Int = 64,
     // 0x00_0000_0000 - 0x00_0040_0000 control
@@ -54,7 +55,7 @@ case class XbarParams(
   val frontDbgAxip = frontAxip.copy(idBits = extIdBits)
   val scalarAxip = AxiParams(addrBits, scalarIdBits, dataBits = scalarDataBits)
   val tensorAxip = AxiParams(addrBits, tensorIdBits, dataBits = tensorDataBits)
-  val uramAxip = AxiParams(addrBits, uramIdBits, dataBits = tensorDataBits)
+  val uramAxip = AxiParams(addrBits, uramIdBits, dataBits = uramDataBits)
   val controlAxip =
     AxiParams(addrBits, controlIdBits, dataBits = controlDataBits)
   val extAxip = AxiParams(addrBits, extIdBits, dataBits = tensorDataBits)

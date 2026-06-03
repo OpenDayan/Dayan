@@ -108,7 +108,7 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
             masters = Seq(
               AXI4MasterParameters(
                 name = axiPortName.kebab,
-                id = IdRange(0, 1 << uramAxip.idBits),
+                id = IdRange(0, 1 << tlParms.sourceBits),
                 maxFlight = Some(1)
               )
             )
@@ -116,7 +116,11 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
         )
       )
     val uramDevice = new SimpleDevice("uram", Seq("rvtng,uram0"))
-    require(dmaParams.dataBits == uramAxip.dataBits)
+    require(tlParms.dataBits == uramAxip.dataBits)
+    require(
+      tlParms.sourceBits >= uramAxip.idBits,
+      s"require tlParms.sourceBits >= uramAxip.idBits, but ${tlParms.sourceBits} < ${uramAxip.idBits}"
+    )
     // TODO: add me to config
     private val sysBeatBytes = dmaParams.dataBits / 8
     private val uramBeatBytes = 32
@@ -159,7 +163,6 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
     (xbar.node
       := TLBuffer(BufferParams.default)
       := TLFIFOFixer(TLFIFOFixer.all)
-      := TLWidthWidget(uramAxip.dataBits / 8)
       := AXI4ToTL()
       := AXI4UserYanker(Some(1))
       := AXI4Fragmenter()

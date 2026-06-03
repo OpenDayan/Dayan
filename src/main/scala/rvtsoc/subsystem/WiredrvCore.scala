@@ -38,7 +38,7 @@ class WiredrvCore(implicit p: config.Parameters) extends BaseScalarCore {
 
   require(
     io.m_axi.params.idBits >= wiredCore.io.mem.params.idBits,
-    "io.m_axi.params.idBits >= wiredCore.io.mem.params.idBits"
+    s"require io.m_axi.params.idBits >= wiredCore.io.mem.params.idBits, but ${io.m_axi.params.idBits} < ${wiredCore.io.mem.params.idBits}"
   )
   io.m_axi <> wiredCore.io.mem
 }

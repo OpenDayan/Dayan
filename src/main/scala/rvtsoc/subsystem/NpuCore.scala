@@ -116,14 +116,7 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
         )
       )
     val uramDevice = new SimpleDevice("uram", Seq("rvtng,uram0"))
-    require(tlParms.dataBits == uramAxip.dataBits)
-    require(
-      tlParms.sourceBits >= uramAxip.idBits,
-      s"require tlParms.sourceBits >= uramAxip.idBits, but ${tlParms.sourceBits} < ${uramAxip.idBits}"
-    )
-    // TODO: add me to config
-    private val sysBeatBytes = dmaParams.dataBits / 8
-    private val uramBeatBytes = 32
+    private val uramBeatBytes = tlParms.dataBits / 8
     val uramNode = TLManagerNode(
       Seq(
         TLSlavePortParameters.v1(
@@ -134,10 +127,10 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
               regionType = RegionType.IDEMPOTENT,
               supportsGet = TransferSizes(
                 1,
-                sysBeatBytes
-              ), // TODO: use better way to determine max transfer size
-              supportsPutPartial = TransferSizes(1, sysBeatBytes),
-              supportsPutFull = TransferSizes(1, sysBeatBytes),
+                uramBeatBytes
+              ),
+              supportsPutPartial = TransferSizes(1, uramBeatBytes),
+              supportsPutFull = TransferSizes(1, uramBeatBytes),
               fifoId = Some(0)
             )
           ), // requests are handled in order
@@ -185,6 +178,11 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
       })
       utils.connectAxi(axiNode.out.head._1, io.axi)
       io.tl <> uramNode.in.head._1
+      require(tlParms.dataBits == uramNode.in.head._1.params.dataBits)
+      require(
+        tlParms.sourceBits >= uramNode.in.head._1.params.sourceBits,
+        s"require tlParms.sourceBits >= uramNode.in.head._1.params.sourceBits + 1, but ${tlParms.sourceBits} < ${uramNode.in.head._1.params.sourceBits}"
+      )
     }
   }
 
@@ -203,11 +201,12 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
 class BaseNpuCore(implicit p: Parameters) extends Module {
   val scalarAxip = p(XbarParamsKey).scalarAxip
   val tensorAxip = p(XbarParamsKey).tensorAxip
+  val uramAxip = p(XbarParamsKey).uramAxip
   val maxHartIdBits = p(MaxHartIdBits)
 
   @public val io = IO(new Bundle {
     val hartId = Input(UInt(maxHartIdBits.W))
-    val s_axi_tensor = Flipped(new ExtAxiBundle(tensorAxip))
+    val s_axi_tensor = Flipped(new ExtAxiBundle(uramAxip))
     val m_axi_tensor = new ExtAxiBundle(tensorAxip)
     val m_axi_scalar = new ExtAxiBundle(scalarAxip)
     val scalar_int_in = Input(

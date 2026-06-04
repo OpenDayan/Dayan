@@ -34,5 +34,5 @@ case object RvtngParamsKey extends Field[Option[RvtngParams]](None)
 
 class RvtngConfig
     extends Config((site, here, up) => { case RvtngParamsKey =>
-      Some(RvtngParams(tlSourceBits = up(XbarParamsKey).uramAxip.idBits))
+      Some(RvtngParams(tlSourceBits = up(XbarParamsKey).uramAxip.idBits + 1))
     })

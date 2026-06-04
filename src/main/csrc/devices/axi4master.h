@@ -75,7 +75,7 @@ public:
       for (size_t i = addr_offset; i < addr_offset + data.size(); ++i) {
         size_t strb_byte_idx = i / 8;
         size_t strb_bit_idx = i % 8;
-        strb_ptr->at(strb_byte_idx) |= (1U << strb_bit_idx);
+        strb_ptr->at(strb_byte_idx) |= (1ULL << strb_bit_idx);
       }
       queue.w.push({std::move(w_data_ptr), std::move(strb_ptr)});
 
@@ -114,12 +114,12 @@ public:
     for (size_t i = 0; i < addr_offset; ++i) {
       size_t strb_byte_idx = i / 8;
       size_t strb_bit_idx = i % 8;
-      strb[0]->at(strb_byte_idx) &= ~(1U << strb_bit_idx);
+      strb[0]->at(strb_byte_idx) &= ~(1ULL << strb_bit_idx);
     }
-    for (size_t i = end_addr % dataBytes; i < dataBytes; i++) {
+    for (size_t i = end_addr; i < end_addr_aligned; i++) {
       size_t strb_byte_idx = i / 8;
       size_t strb_bit_idx = i % 8;
-      strb[beats - 1]->at(strb_byte_idx) &= ~(1U << strb_bit_idx);
+      strb[beats - 1]->at(strb_byte_idx) &= ~(1ULL << strb_bit_idx);
     }
 
     while (written_bytes < beats_bytes) {

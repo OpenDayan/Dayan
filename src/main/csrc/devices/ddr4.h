@@ -248,8 +248,8 @@ public:
         auto wdata_it = wdata.begin() + addr_offset;
         std::bitset<dataBytes> wstrb_bits =
             AXIUtils::arrayToBitset<dataBytes / 8>(wstrb) >> addr_offset;
-        auto mem_it = mem->getData(beat_addr_val, 1U << aw_info.size).begin();
-        for (size_t i = 0; i < (1U << aw_info.size); i++) {
+        auto mem_it = mem->getData(beat_addr_val, 1ULL << aw_info.size).begin();
+        for (size_t i = 0; i < (1ULL << aw_info.size); i++) {
           if (wstrb_bits[i]) {
             *mem_it = *wdata_it;
           }
@@ -266,8 +266,8 @@ public:
           auto wdata_it = wdata.begin() + addr_offset;
           std::bitset<dataBytes> wstrb_bits =
               AXIUtils::arrayToBitset<dataBytes / 8>(wstrb) >> addr_offset;
-          auto mem_it = mem->getData(beat_addr_val, 1U << aw_info.size).begin();
-          for (size_t i = 0; i < (1U << aw_info.size); i++) {
+          auto mem_it = mem->getData(beat_addr_val, 1ULL << aw_info.size).begin();
+          for (size_t i = 0; i < (1ULL << aw_info.size); i++) {
             if (wstrb_bits[i]) {
               *mem_it = *wdata_it;
             }

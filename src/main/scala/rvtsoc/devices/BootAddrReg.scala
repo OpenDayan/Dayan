@@ -32,7 +32,10 @@ class BootAddrReg(params: BootAddrRegParams, beatBytes: Int, nCores: Int)(
     val regWidth = 64
 
     val bootAddrRegs = Seq.fill(nCores) {
-      RegInit(params.defaultBootAddress.U(regWidth.W))
+      Seq(
+        RegInit((params.defaultBootAddress & 0xffffffffL).U((regWidth / 2).W)),
+        RegInit((params.defaultBootAddress >> 32).U((regWidth / 2).W))
+      )
     }
 
     node.regmap(
@@ -41,12 +44,20 @@ class BootAddrReg(params: BootAddrRegParams, beatBytes: Int, nCores: Int)(
         Some("boot-address-reg"),
         bootAddrRegs.zipWithIndex.flatMap { case (r, i) =>
           RegField(
-            regWidth,
-            r,
+            regWidth / 2,
+            r(0),
             RegFieldDesc(
-              s"boot-address-$i",
-              s"Boot Address for Hart $i",
+              s"boot-address-$i-l",
+              s"Boot Low Address for Hart $i",
               reset = Some(params.defaultBootAddress)
+            )
+          ) :: RegField(
+            regWidth / 2,
+            r(1),
+            RegFieldDesc(
+              s"boot-address-$i-h",
+              s"Boot High Address for Hart $i",
+              reset = Some(params.defaultBootAddress >> 32)
             )
           ) :: Nil
         }

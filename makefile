@@ -7,7 +7,7 @@ CMAKE ?= cmake
 CONFIG ?= RvtsocConfig
 
 VERILOG_TOP = TestRvtsoc
-VERILOG_VLSI_TOP = Rvtsoc
+VERILOG_FPGA_TOP = RvtsocWrapper
 
 SIM_C_COMPILER ?= clang
 SIM_CXX_COMPILER ?= clang++
@@ -35,9 +35,8 @@ test:
 verilog:
 	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_TOP) -D config=$(CONFIG) gen
 
-verilog-vlsi:
-	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_VLSI_TOP) -D config=$(CONFIG) rvtsoc.genVlsi
-	@cd $(base_dir) && ./deps/rocket-chip/scripts/vlsi_mem_gen $(base_dir)/generated/$(VERILOG_VLSI_TOP)/rvtsoc.mem.conf -o $(base_dir)/generated/$(VERILOG_VLSI_TOP)/rvtsoc.mem.sv
+verilog-fpga:
+	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_FPGA_TOP) -D config=$(CONFIG) gen
 
 verilog-clean:
 	rm -rf out/ generated/

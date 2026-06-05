@@ -1,6 +1,7 @@
 package rvtsoc.top
 
 import chisel3._
+import chisel3.experimental.BaseModule
 
 import org.chipsalliance.cde.config.Parameters
 import org.chipsalliance.diplomacy.lazymodule.LazyModule
@@ -19,6 +20,26 @@ import rvtsoc.subsystem._
 import rvtsoc.subsystem.utils.genXbarSlvp
 import rvtsoc.blackbox
 import rvtsoc.devices._
+
+class RvtsocWrapper(implicit val p: Parameters) extends Module {
+
+  val rvtsoc = Module(new Rvtsoc)
+
+  val s_axi = IO(
+    Flipped(
+      new ExtAxiBundle(rvtsoc.frontAxip.copy(addrBits = 32, atomicBits = 0))
+    )
+  )
+  val m_axi = IO(new ExtAxiBundle(rvtsoc.extAxip.copy(atomicBits = 0)))
+  val int = IO(rvtsoc.int.cloneType)
+
+  rvtsoc.s_axi <> s_axi
+  m_axi <> rvtsoc.m_axi
+  int <> rvtsoc.int
+  rvtsoc.jtag.map { j =>
+    j <> DontCare
+  }
+}
 
 class Rvtsoc(implicit p: Parameters) extends Module {
   val uramAxip = p(XbarParamsKey).uramAxip

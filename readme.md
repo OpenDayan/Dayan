@@ -8,13 +8,13 @@ make deps
 
 ## build
 
-### verilog for simulation
+### generate verilog for simulation
 
 ```bash
 make
 ```
 
-### verilog for VLSI
+### generate verilog for VLSI
 
 ```bash
 make verilog-vlsi
@@ -25,6 +25,8 @@ make verilog-vlsi
 make sim-config
 make sim -j
 ```
+
+waveform: `sim/logs/*.fst`
 
 ## develop
 

@@ -30,8 +30,13 @@ class WiredrvCore(implicit p: config.Parameters) extends BaseScalarCore {
 
   wiredCore.io.clusterInterrupt := false.B
 
-  wiredCore.io.tensorInst <> io.tensorInst
-  io.tensorResp <> wiredCore.io.tensorResp
+  io.tensorInst.valid := wiredCore.io.tensorInst.valid
+  io.tensorInst.bits := wiredCore.io.tensorInst.bits
+  wiredCore.io.tensorInst.ready := io.tensorInst.ready
+
+  wiredCore.io.tensorResp.valid := io.tensorResp.valid
+  io.tensorResp.ready := (io.tensorResp.valid && io.tensorResp.bits.rd === 0.U) || wiredCore.io.tensorResp.ready
+  wiredCore.io.tensorResp.bits := io.tensorResp.bits
 
   wiredCore.io.ramctl := DontCare
   wiredCore.io.dft <> DontCare

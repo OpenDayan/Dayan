@@ -92,7 +92,6 @@ void run_next_cycle(uint64_t n, bool print_progress) {
   unsigned long realN = n;
   for (unsigned long i = 0; i < realN;) {
     top->clock = 1;
-    DDR4Mod.tick();
     npu_time += npu_cycle;
     while (npu_time > dram_time) {
       DDR4Mod.tick();

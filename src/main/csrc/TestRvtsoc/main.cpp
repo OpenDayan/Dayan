@@ -21,6 +21,7 @@
 #include "spdlog/spdlog.h"
 #include "utils/bar.h"
 #include "utils/config.h"
+#include "utils/fst_snapshot.h"
 #include "utils/fuse_driver.h"
 #include "utils/logger.h"
 
@@ -36,10 +37,10 @@ std::shared_ptr<spdlog::logger> logger = nullptr;
 std::unique_ptr<VerilatedContext> contextp = nullptr;
 std::unique_ptr<VTestRvtsoc> top = nullptr;
 #if VM_TRACE_FST
-std::shared_ptr<VerilatedFstC> m_trace = nullptr;
+std::shared_ptr<FstHistoryWriter> fst_writer = nullptr;
 #endif
 std::unique_ptr<std::thread> fuse_thread;
-static uint64_t dump_offset;
+// static uint64_t dump_offset;
 bool is_shutting_down = false;
 const size_t max_cycle = 100'000'000;
 
@@ -51,16 +52,19 @@ const uint64_t boot_addr_base = 0x1000;
 const uint64_t clint_base = 0x20000;
 const size_t n_cores = 1;
 
+const uint64_t dump_period = 5;
+
 void shutdown() {
   signal(SIGSEGV, nullptr);
   logger->info("Try to Shutting down simulation...");
   is_shutting_down = true;
 #if VM_TRACE
-  if (m_trace) {
+  if (fst_writer) {
     logger->info("Export Trace...");
-    m_trace->dump(contextp->time() - dump_offset);
-    m_trace->close();
-    m_trace = nullptr;
+    fst_writer->dump(contextp->time() * dump_period);
+    fst_writer->snapshot(fst_log_file.c_str());
+    fst_writer->close();
+    fst_writer = nullptr;
   }
 #endif
   if (!FuseDriver::session_exited()) {
@@ -100,7 +104,7 @@ void run_next_cycle(uint64_t n, bool print_progress) {
     top->eval();
 #if VM_TRACE
     if (enable_waveform)
-      m_trace->dump(contextp->time() - dump_offset);
+      fst_writer->dump(contextp->time() * dump_period);
 #endif
     contextp->timeInc(1);
     top->clock = 0;
@@ -108,7 +112,7 @@ void run_next_cycle(uint64_t n, bool print_progress) {
 
 #if VM_TRACE
     if (enable_waveform)
-      m_trace->dump(contextp->time() - dump_offset);
+      fst_writer->dump(contextp->time() * dump_period);
 #endif
     contextp->timeInc(1);
 
@@ -182,15 +186,8 @@ void vl_stop(const char *filename, int line, const char *func) {
 
 void dump_waveform(void) {
 #if VM_TRACE
-  if (contextp->time() != dump_offset) {
-    m_trace->close();
-    start_surfer_process((char *)fst_log_file.c_str());
-    m_trace = std::make_unique<VerilatedFstC>();
-    top->trace(m_trace.get(), 99);
-    sleep(2);
-    dump_offset = contextp->time();
-    m_trace->open(fst_log_file.c_str());
-  }
+  fst_writer->snapshot(fst_log_file.c_str());
+  start_surfer_process((char *)fst_log_file.c_str());
 #else
   logger->warn("Waveform dump is disabled. Rebuild with VM_TRACE to enable.");
 #endif
@@ -293,9 +290,10 @@ int main(int argc, char **argv) {
   top = std::unique_ptr<VTestRvtsoc>(new VTestRvtsoc{contextp.get(), "TOP"});
 
 #if VM_TRACE_FST
-  m_trace = std::make_unique<VerilatedFstC>();
-  top->trace(m_trace.get(), 0);
-  m_trace->open(fst_log_file.c_str());
+  fst_writer = std::make_unique<FstHistoryWriter>(top.get(), 99, dump_period);
+  fst_writer->set_time_unit("ns");
+  fst_writer->set_time_resolution("100ps");
+  fst_writer->open((fst_log_file.string() + ".tmp").c_str());
 #endif
 
   top->reset = 1;

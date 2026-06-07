@@ -64,23 +64,24 @@ pid_t start_surfer_process(char* filename) {
     // 检查并杀死已存在的子进程
     if (child_pid > 0) {
         // 检查进程是否存活
-        if (kill(child_pid, 0) == 0) {
-            // 先尝试优雅终止
-            if (kill(child_pid, SIGTERM) == 0) {
-                // 等待进程终止
-                for (int i = 0; i < 50; ++i) {
-                    if (kill(child_pid, 0) == -1) {
-                        break; // 进程已终止
-                    }
-                    usleep(100000);
-                }
+        // if (kill(child_pid, 0) == 0) {
+        //     // 先尝试优雅终止
+        //     if (kill(child_pid, SIGTERM) == 0) {
+        //         // 等待进程终止
+        //         for (int i = 0; i < 50; ++i) {
+        //             if (kill(child_pid, 0) == -1) {
+        //                 break; // 进程已终止
+        //             }
+        //             usleep(100000);
+        //         }
 
-                // 优雅终止失败，强制终止
-                if (kill(child_pid, 0) == 0) {
-                    kill(child_pid, SIGKILL);
-                }
-            }
-        }
+        //         // 优雅终止失败，强制终止
+        //         if (kill(child_pid, 0) == 0) {
+        //             kill(child_pid, SIGKILL);
+        //         }
+        //     }
+        // }
+        return child_pid;
     }
 
     // 创建新的子进程

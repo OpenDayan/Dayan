@@ -15,7 +15,8 @@ case object XbarParamsKey extends Field[XbarParams]
 
 case class XbarParams(
     addrBits: Int = 40,
-    frontIdBits: Int = 7,
+    frontIdBits: Int = 6,
+    tensorIdBits: Int = 9,
     scalarIdBits: Int = 5,
 
     frontDataBits: Int = 512,
@@ -46,10 +47,9 @@ case class XbarParams(
 
     intrHandlerBase: Long = 0x2000
 ) {
-  val tensorIdBits = frontIdBits + log2Ceil(4)
-  val extIdBits = tensorIdBits
-  val uramIdBits = tensorIdBits
-  val controlIdBits = tensorIdBits
+  val extIdBits = tensorIdBits + log2Ceil(4)
+  val uramIdBits = extIdBits
+  val controlIdBits = extIdBits
 
   val frontAxip = AxiParams(addrBits, frontIdBits, dataBits = frontDataBits)
   val frontDbgAxip = frontAxip.copy(idBits = extIdBits)

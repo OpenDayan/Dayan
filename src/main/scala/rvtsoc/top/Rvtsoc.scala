@@ -70,7 +70,7 @@ class Rvtsoc(implicit p: Parameters) extends Module {
   val systemXbarSlvp = genXbarSlvp(
     Seq("front", "scalar", "tensor") ++
       controlBlock.io.m_axi.map(_ => "debug"),
-    frontAxip
+    tensorAxip
   )
   val systemXbarMstp = Seq(
     PortParams(

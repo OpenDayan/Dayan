@@ -8,18 +8,21 @@ make deps
 
 ## build
 
+generated verilog: `generated/*/`
+
 ### generate verilog for simulation
 
 ```bash
 make
 ```
 
-### generate verilog for VLSI
+### generate verilog for FPGA
 
 ```bash
-make verilog-vlsi
+make verilog-fpga
 ```
-## sim
+
+## simulation
 
 ```bash
 make sim-config

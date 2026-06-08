@@ -15,7 +15,7 @@ case object XbarParamsKey extends Field[XbarParams]
 
 case class XbarParams(
     addrBits: Int = 40,
-    frontIdBits: Int = 5,
+    frontIdBits: Int = 7,
     scalarIdBits: Int = 5,
 
     frontDataBits: Int = 512,

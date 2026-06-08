@@ -194,6 +194,10 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
   rvtng.instReq <> io.instReq
   io.instResp <> rvtng.instResp
   utils.connectAxi(io.m_axi, rvtng.axi4)
+  require(
+    io.m_axi.params.idBits >= rvtng.axi4.params.idBits,
+    s"require io.m_axi.params.idBits >= rvtng.axi4.params.idBits, but ${io.m_axi.params.idBits} < ${rvtng.axi4.params.idBits}"
+  )
   axi2Tl.io.axi <> io.s_axi
 }
 

@@ -35,7 +35,7 @@ class WiredrvCore(implicit p: config.Parameters) extends BaseScalarCore {
   wiredCore.io.tensorInst.ready := io.tensorInst.ready
 
   wiredCore.io.tensorResp.valid := io.tensorResp.valid
-  io.tensorResp.ready := (io.tensorResp.valid && io.tensorResp.bits.rd === 0.U) || wiredCore.io.tensorResp.ready
+  io.tensorResp.ready := wiredCore.io.tensorResp.ready
   wiredCore.io.tensorResp.bits := io.tensorResp.bits
 
   wiredCore.io.ramctl := DontCare

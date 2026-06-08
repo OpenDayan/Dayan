@@ -27,7 +27,7 @@ class RvtsocWrapper(implicit val p: Parameters) extends Module {
 
   val s_axi = IO(
     Flipped(
-      new ExtAxiBundle(rvtsoc.frontAxip.copy(addrBits = 32, atomicBits = 0))
+      new ExtAxiBundle(rvtsoc.frontAxip.copy(atomicBits = 0))
     )
   )
   val m_axi = IO(new ExtAxiBundle(rvtsoc.extAxip.copy(atomicBits = 0)))

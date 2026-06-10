@@ -14,7 +14,8 @@ import rvtng.vpu._
 import rvtsoc.subsystem.XbarParamsKey
 
 case class RvtngParams(
-    matParams: MatParams = MatParams(cM = 16, cN = 8, cK = 32), // 8T @ 1G
+    // matParams: MatParams = MatParams(cM = 16, cN = 8, cK = 32), // 8T @ 1G
+    matParams: MatParams = MatParams(cM = 8, cN = 8, cK = 32), // 4T @ 1G
     vecParams: VecParams = VecParams(),
     dmaParams: DMAParams = DMAParams(),
     vpuParams: VpuParams = VpuParams(),

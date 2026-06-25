@@ -10,8 +10,8 @@ SUBMODULES_MAP = {
         "dependencies/diplomacy",
         "dependencies/hardfloat",
     ],
-    "deps/LaomaSubsystem": [
-        "xs-utils",
+    "deps/AxiInfra": [
+        "dep/xs-utils",
     ],
     "deps/rvt": [
         "csrc/DRAMsim3",

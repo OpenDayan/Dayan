@@ -7,9 +7,9 @@
 [submodule "deps/rocket-chip-blocks"]
 	path = deps/rocket-chip-blocks
 	url = https://github.com/chipsalliance/rocket-chip-blocks.git
-[submodule "deps/LaomaSubsystem"]
-	path = deps/LaomaSubsystem
-	url = https://git.rvnpu.cn/rvnpu/LaomaSubsystem.git
+[submodule "deps/AxiInfra"]
+	path = deps/AxiInfra
+	url = https://git.rvnpu.cn/rvnpu/AxiInfra.git
 [submodule "deps/pcie-interrupt-handler"]
 	path = deps/pcie-interrupt-handler
 	url = https://git.rvnpu.cn/rvnpu/pcie-interrupt-handler

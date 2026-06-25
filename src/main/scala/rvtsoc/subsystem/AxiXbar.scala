@@ -9,9 +9,7 @@ import org.chipsalliance.diplomacy.lazymodule.LazyModule
 
 import freechips.rocketchip.util._
 
-import lmss.axi._
-import lmss.param.{LmssParamsKey, PortParams}
-import lmss.mem.MemoryBank
+import xs.infra.axi._
 
 class AxiXbar(
     mstParams: Seq[PortParams],

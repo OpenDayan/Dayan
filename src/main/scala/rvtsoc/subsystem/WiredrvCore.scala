@@ -10,7 +10,7 @@ import org.chipsalliance.diplomacy.lazymodule._
 import wiredrv.WiredCore
 import wiredrv.CoreParams
 
-import lmss.axi.AxiBundle
+import xs.infra.axi.AxiBundle
 
 import rvtsoc.config.WiredrvParamsKey
 

@@ -7,9 +7,7 @@ import org.chipsalliance.cde.config._
 import freechips.rocketchip.amba.apb.APBBundleParameters
 import freechips.rocketchip.diplomacy.{AddressSet, RegionType}
 
-import lmss.LaomaXbar
-import lmss.axi.{AxiParams, ExtAxiBundle}
-import lmss.param.{AddressParams, LmssParams, PortParams}
+import xs.infra.axi._
 
 case object XbarParamsKey extends Field[XbarParams]
 

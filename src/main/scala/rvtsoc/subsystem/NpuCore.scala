@@ -13,7 +13,7 @@ import org.chipsalliance.cde.config
 import org.chipsalliance.cde.config.Parameters
 import org.chipsalliance.diplomacy.lazymodule._
 
-import lmss.axi.{ExtAxiBundle, AxiBundle => LmAxiBundle}
+import xs.infra.axi.{ExtAxiBundle, AxiBundle => XsAxiBundle}
 import rvtsoc.subsystem.XbarParamsKey
 
 import freechips.rocketchip.devices.tilelink.BootROMLocated
@@ -82,8 +82,8 @@ class BaseRvtngCore(implicit p: config.Parameters) extends Module {
     val hartId = Input(UInt(maxHartIdBits.W))
     val instReq = Flipped(Decoupled(new TensorInst))
     val instResp = Decoupled(new TensorResp)
-    val m_axi = new LmAxiBundle(tensorAxip)
-    val s_axi = Flipped(new LmAxiBundle(uramAxip))
+    val m_axi = new XsAxiBundle(tensorAxip)
+    val s_axi = Flipped(new XsAxiBundle(uramAxip))
   })
 }
 
@@ -165,7 +165,7 @@ class RvtngCore(implicit p: config.Parameters) extends BaseRvtngCore {
     lazy val module = new Axi2TlImpl
     class Axi2TlImpl extends LazyModuleImp(this) {
       val io = IO(new Bundle {
-        val axi = Flipped(new LmAxiBundle(uramAxip))
+        val axi = Flipped(new XsAxiBundle(uramAxip))
         val tl = new TLBundle(
           TLBundleParameters.emptyBundleParams.copy(
             addressBits = tlParms.addressBits,

@@ -9,7 +9,7 @@ import org.chipsalliance.diplomacy.lazymodule.LazyModule
 import freechips.rocketchip.devices.debug.SimJTAG
 import freechips.rocketchip.amba.axi4._
 
-import lmss.axi.ExtAxiBundle
+import xs.infra.axi.ExtAxiBundle
 
 import rvtsoc.utils.ExtraFiles
 import rvtsoc.devices._

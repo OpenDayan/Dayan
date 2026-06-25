@@ -10,9 +10,7 @@ import freechips.rocketchip.util.{AsyncQueueParams, BooleanToAugmentedBoolean}
 import freechips.rocketchip.devices.debug.ExportDebug
 import freechips.rocketchip.jtag.JTAGIO
 
-import lmss.LaomaXbar
-import lmss.axi._
-import lmss.param.{AddressParams, LmssParams, PortParams}
+import xs.infra.axi._
 
 import PCIeAdapter.XDMAIOBundle
 

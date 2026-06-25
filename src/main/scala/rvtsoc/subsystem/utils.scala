@@ -5,18 +5,18 @@ import chisel3._
 import freechips.rocketchip.amba.axi4.AXI4Bundle
 import freechips.rocketchip.util.AsyncQueueParams
 
-import lmss.axi.{
-  AxiBundle => LmAxiBundle,
+import xs.infra.axi.{
+  AxiBundle => XsAxiBundle,
   ExtAxiBundle => LmExtAxiBundle,
-  AxiParams => LmAxiParams
+  AxiParams => XsAxiParams
 }
-import lmss.param.PortParams
+import xs.infra.axi.PortParams
 import rvtng.utils.PartialAssign
 
 object utils {
   def connectAXI4BundleAxiBundle(
       axi4Bundle: AXI4Bundle,
-      axiBundle: LmAxiBundle
+      axiBundle: XsAxiBundle
   ) = {
     // ar channel
     axi4Bundle.ar.bits.addr := axiBundle.ar.bits.addr
@@ -68,17 +68,17 @@ object utils {
     axi4Bundle.r.ready := axiBundle.r.ready
   }
 
-  def connectAxi(axi4Bundle: AXI4Bundle, axiBundle: LmAxiBundle) =
+  def connectAxi(axi4Bundle: AXI4Bundle, axiBundle: XsAxiBundle) =
     connectAXI4BundleAxiBundle(axi4Bundle, axiBundle)
 
   def connectAxi(axi4Bundle: AXI4Bundle, extAxiBundle: LmExtAxiBundle) {
-    val axiBundle = Wire(new LmAxiBundle(extAxiBundle.params))
+    val axiBundle = Wire(new XsAxiBundle(extAxiBundle.params))
     axiBundle <> extAxiBundle
     connectAXI4BundleAxiBundle(axi4Bundle, axiBundle)
   }
 
   def connectAxiBundleAXI4Bundle(
-      axiBundle: LmAxiBundle,
+      axiBundle: XsAxiBundle,
       axi4Bundle: AXI4Bundle
   ) = {
     // ar channel
@@ -136,62 +136,62 @@ object utils {
   }
 
   def connectAxi(
-      axiBundle: LmAxiBundle,
+      axiBundle: XsAxiBundle,
       axi4Bundle: AXI4Bundle
   ) = connectAxiBundleAXI4Bundle(axiBundle, axi4Bundle)
 
   def connectAxi(extAxiBundle: LmExtAxiBundle, axi4Bundle: AXI4Bundle) {
-    val axiBundle = Wire(new LmAxiBundle(extAxiBundle.params))
+    val axiBundle = Wire(new XsAxiBundle(extAxiBundle.params))
     connectAxiBundleAXI4Bundle(axiBundle, axi4Bundle)
     extAxiBundle <> axiBundle
     extAxiBundle.awatop := 0.U
   }
 
   def connectAxi(
-      lmAxi: LmAxiBundle,
+      xsAxi: XsAxiBundle,
       rvtngAXI: rvtng.bus.AXI4Bundle
   ) = {
-    lmAxi.ar.bits := DontCare
-    lmAxi.ar.bits.addr := rvtngAXI.ar.bits.addr
-    lmAxi.ar.bits.id := rvtngAXI.ar.bits.id
-    lmAxi.ar.bits.size := rvtngAXI.ar.bits.size
-    lmAxi.ar.bits.len := rvtngAXI.ar.bits.len
-    lmAxi.ar.bits.burst := rvtngAXI.ar.bits.burst
-    lmAxi.ar.valid := rvtngAXI.ar.valid
-    rvtngAXI.ar.ready := lmAxi.ar.ready
+    xsAxi.ar.bits := DontCare
+    xsAxi.ar.bits.addr := rvtngAXI.ar.bits.addr
+    xsAxi.ar.bits.id := rvtngAXI.ar.bits.id
+    xsAxi.ar.bits.size := rvtngAXI.ar.bits.size
+    xsAxi.ar.bits.len := rvtngAXI.ar.bits.len
+    xsAxi.ar.bits.burst := rvtngAXI.ar.bits.burst
+    xsAxi.ar.valid := rvtngAXI.ar.valid
+    rvtngAXI.ar.ready := xsAxi.ar.ready
 
-    lmAxi.aw.bits := DontCare
-    lmAxi.aw.bits.addr := rvtngAXI.aw.bits.addr
-    lmAxi.aw.bits.id := rvtngAXI.aw.bits.id
-    lmAxi.aw.bits.size := rvtngAXI.aw.bits.size
-    lmAxi.aw.bits.len := rvtngAXI.aw.bits.len
-    lmAxi.aw.bits.burst := rvtngAXI.aw.bits.burst
-    lmAxi.aw.valid := rvtngAXI.aw.valid
-    rvtngAXI.aw.ready := lmAxi.aw.ready
+    xsAxi.aw.bits := DontCare
+    xsAxi.aw.bits.addr := rvtngAXI.aw.bits.addr
+    xsAxi.aw.bits.id := rvtngAXI.aw.bits.id
+    xsAxi.aw.bits.size := rvtngAXI.aw.bits.size
+    xsAxi.aw.bits.len := rvtngAXI.aw.bits.len
+    xsAxi.aw.bits.burst := rvtngAXI.aw.bits.burst
+    xsAxi.aw.valid := rvtngAXI.aw.valid
+    rvtngAXI.aw.ready := xsAxi.aw.ready
 
     rvtngAXI.r.bits := DontCare
-    rvtngAXI.r.bits.id := lmAxi.r.bits.id
-    rvtngAXI.r.bits.resp := lmAxi.r.bits.resp
-    rvtngAXI.r.bits.data := lmAxi.r.bits.data
-    rvtngAXI.r.bits.last := lmAxi.r.bits.last
-    rvtngAXI.r.valid := lmAxi.r.valid
-    lmAxi.r.ready := rvtngAXI.r.ready
+    rvtngAXI.r.bits.id := xsAxi.r.bits.id
+    rvtngAXI.r.bits.resp := xsAxi.r.bits.resp
+    rvtngAXI.r.bits.data := xsAxi.r.bits.data
+    rvtngAXI.r.bits.last := xsAxi.r.bits.last
+    rvtngAXI.r.valid := xsAxi.r.valid
+    xsAxi.r.ready := rvtngAXI.r.ready
 
-    lmAxi.w.bits := DontCare
-    lmAxi.w.bits.strb := rvtngAXI.w.bits.strb
-    lmAxi.w.bits.data := rvtngAXI.w.bits.data
-    lmAxi.w.bits.last := rvtngAXI.w.bits.last
-    lmAxi.w.valid := rvtngAXI.w.valid
-    rvtngAXI.w.ready := lmAxi.w.ready
+    xsAxi.w.bits := DontCare
+    xsAxi.w.bits.strb := rvtngAXI.w.bits.strb
+    xsAxi.w.bits.data := rvtngAXI.w.bits.data
+    xsAxi.w.bits.last := rvtngAXI.w.bits.last
+    xsAxi.w.valid := rvtngAXI.w.valid
+    rvtngAXI.w.ready := xsAxi.w.ready
 
     rvtngAXI.b.bits := DontCare
-    rvtngAXI.b.bits.id := lmAxi.b.bits.id
-    rvtngAXI.b.bits.resp := lmAxi.b.bits.resp
-    rvtngAXI.b.valid := lmAxi.b.valid
-    lmAxi.b.ready := rvtngAXI.b.ready
+    rvtngAXI.b.bits.id := xsAxi.b.bits.id
+    rvtngAXI.b.bits.resp := xsAxi.b.bits.resp
+    rvtngAXI.b.valid := xsAxi.b.valid
+    xsAxi.b.ready := rvtngAXI.b.ready
   }
 
-  def genXbarSlvp(names: Seq[String], axip: LmAxiParams): Seq[PortParams] =
+  def genXbarSlvp(names: Seq[String], axip: XsAxiParams): Seq[PortParams] =
     names.map { name =>
       PortParams(
         axip = axip,

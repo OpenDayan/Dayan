@@ -266,7 +266,7 @@ public:
       *(uint32_t *)size = size_val;
 
       *len = 0;
-      *burst = 0;
+      *burst = 1;
     }
   }
 
@@ -326,7 +326,7 @@ public:
       *(uint32_t *)size = size_val;
 
       *len = 0;
-      *burst = 0;
+      *burst = 1;
     }
   }
 

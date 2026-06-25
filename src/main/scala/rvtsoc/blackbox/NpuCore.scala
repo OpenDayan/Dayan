@@ -5,8 +5,8 @@ import chisel3.util._
 
 import org.chipsalliance.cde.config.Parameters
 
-import lmss.axi.ExtAxiBundle
-import lmss.axi.AxiParams
+import xs.infra.axi.ExtAxiBundle
+import xs.infra.axi.AxiParams
 import rvtsoc.subsystem.XbarParamsKey
 import rvtsoc.subsystem.{BaseNpuCore, BaseRvtngCore}
 import rvtsoc.subsystem.BaseScalarCore

@@ -105,32 +105,34 @@ object `package` extends SbtModule with ScalafmtModule {
       override def moduleDeps =
         super.moduleDeps ++ Seq(
           `rocket-chip`.dependencies.hardfloat.hardfloat,
-          LaomaSubsystem
+          AxiInfra
         )
     }
 
-    object LaomaSubsystem extends CommonSbtModule {
-      object `xs-utils` extends CommonSbtModule {
-        override def moduleDeps =
-          super.moduleDeps ++ Seq(`rocket-chip`)
-        override def scalacOptions =
-          super.scalacOptions() ++ Seq("-Ymacro-annotations", "-Ytasty-reader")
-        override def allSourceFiles = Task {
-          super
-            .allSourceFiles()
-            .filter { pr => pr.path.toString.contains("src/main/scala") }
-            .filterNot { pr =>
-              pr.path.toString.contains(
-                "src/main/scala/xs/utils/debug/HardwareAssertion.scala"
-              ) ||
-              pr.path.toString.contains(
-                "src/main/scala/xs/utils/cache"
-              )
-            }
+    object AxiInfra extends CommonSbtModule {
+      object dep extends CommonSbtModule {
+        object `xs-utils` extends CommonSbtModule {
+          override def moduleDeps =
+            super.moduleDeps ++ Seq(`rocket-chip`)
+          override def scalacOptions =
+            super.scalacOptions() ++ Seq("-Ymacro-annotations", "-Ytasty-reader")
+          override def allSourceFiles = Task {
+            super
+              .allSourceFiles()
+              .filter { pr => pr.path.toString.contains("src/main/scala") }
+              .filterNot { pr =>
+                pr.path.toString.contains(
+                  "src/main/scala/xs/utils/debug/HardwareAssertion.scala"
+                ) ||
+                pr.path.toString.contains(
+                  "src/main/scala/xs/utils/cache"
+                )
+              }
+          }
         }
       }
       override def moduleDeps =
-        super.moduleDeps ++ Seq(`xs-utils`)
+        super.moduleDeps ++ Seq(dep.`xs-utils`)
     }
 
     object `pcie-interrupt-handler` extends CommonSbtModule {
@@ -142,7 +144,7 @@ object `package` extends SbtModule with ScalafmtModule {
 
     object WiredRV extends CommonSbtModule {
       override def moduleDeps =
-        super.moduleDeps ++ Seq(LaomaSubsystem, difftest)
+        super.moduleDeps ++ Seq(AxiInfra, difftest)
     }
   }
 
@@ -152,7 +154,7 @@ object `package` extends SbtModule with ScalafmtModule {
     super.moduleDeps ++ Seq(
       deps.testchipip,
       deps.`rocket-chip`,
-      deps.LaomaSubsystem,
+      deps.AxiInfra,
       deps.rvt,
       deps.`pcie-interrupt-handler`,
       deps.WiredRV

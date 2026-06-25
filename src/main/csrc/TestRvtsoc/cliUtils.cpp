@@ -16,7 +16,7 @@
 #include <errno.h>
 
 // 供 DRAMsim3 使用，动态 CPU 频率调整
-double npu_cycle = 1000.f / 250.f, dram_cycle = 1000.f / 1200.f, npu_freq = 250.f, dram_freq = 1200.f;
+double npu_cycle = 1000.f / 1000.f, dram_cycle = 1000.f / 1200.f, npu_freq = 1000.f, dram_freq = 1200.f;
 
 // 历史记录相关定义
 #define MAX_HISTORY_SIZE 100

@@ -49,7 +49,7 @@ import freechips.rocketchip.subsystem.{InSubsystem, HasDTS}
 import freechips.rocketchip.devices.debug._
 import freechips.rocketchip.jtag._
 
-import lmss.axi.{AxiParams, ExtAxiBundle, AxiBundle}
+import xs.infra.axi.{AxiParams, ExtAxiBundle, AxiBundle}
 
 import InterruptModule.InterruptModule
 

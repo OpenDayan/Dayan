@@ -9,16 +9,16 @@
 	url = https://github.com/chipsalliance/rocket-chip-blocks.git
 [submodule "deps/AxiInfra"]
 	path = deps/AxiInfra
-	url = https://git.rvnpu.cn/rvnpu/AxiInfra.git
+	url = ../AxiInfra.git
 [submodule "deps/pcie-interrupt-handler"]
 	path = deps/pcie-interrupt-handler
-	url = https://git.rvnpu.cn/rvnpu/pcie-interrupt-handler
+	url = ../pcie-interrupt-handler
 [submodule "deps/WiredRV"]
 	path = deps/WiredRV
-	url = https://git.rvnpu.cn/rvnpu/WiredRV.git
+	url = ../WiredRV.git
 [submodule "deps/difftest"]
 	path = deps/difftest
 	url = https://github.com/OpenXiangShan-Nanhu/difftest
 [submodule "deps/rvt"]
 	path = deps/rvt
-	url = https://git.rvnpu.cn/rvnpu/rvt.git
+	url = ../Dayan-Core.git

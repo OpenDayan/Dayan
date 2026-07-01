@@ -51,11 +51,14 @@ import freechips.rocketchip.jtag._
 
 import xs.infra.axi.{AxiParams, ExtAxiBundle, AxiBundle}
 
-import InterruptModule.InterruptModule
-
 import rvtsoc.devices._
 
 case object RtcPeriodKey extends Field[BigInt]
+
+case class XDMAIOBundle(numInterrupts: Int) extends Bundle {
+    val usr_irq_req = Output(UInt(numInterrupts.W))
+    val usr_irq_ack = Input(UInt(numInterrupts.W))
+}
 
 class ControlBlock(implicit p: Parameters) extends LazyModule with HasDTS {
   val controlAxip = p(XbarParamsKey).controlAxip
@@ -156,7 +159,8 @@ class ControlBlock(implicit p: Parameters) extends LazyModule with HasDTS {
   }
 
   val bootAddrReg = p(BootAddrRegKey).map { params =>
-    val reg = LazyModule(new BootAddrReg(params, controlAxip.dataBits / 8, nCores))
+    val reg =
+      LazyModule(new BootAddrReg(params, controlAxip.dataBits / 8, nCores))
     reg.node := xbar.node
     reg
   }
@@ -172,15 +176,6 @@ class ControlBlock(implicit p: Parameters) extends LazyModule with HasDTS {
     )
   )
   error.node := xbar.node
-
-  val interruptModule = LazyModule(
-    new InterruptModule(
-      base = intrHandlerBase,
-      numInterrupts = nInterrupts,
-      groupSize = intrGroupSize
-    )
-  )
-  interruptModule.node := xbar.node
 
   val debugCustomXbarOpt = p(DebugModuleKey).map(params =>
     LazyModule(new DebugCustomXbar(outputRequiresInput = false))
@@ -248,7 +243,7 @@ class ControlBlock(implicit p: Parameters) extends LazyModule with HasDTS {
         lmod.module.io.time.cloneType
       }
       val tensor_ints_in = Input(Vec(nCores, Bool()))
-      val usr_int = interruptModule.module.io.cloneType
+      val usr_int = new XDMAIOBundle(1)
       val jtag = p(ExportDebug).jtag.option(Flipped(new JTAGIO))
       val m_axi = debugAxiNode.map { _ =>
         new AxiBundle(frontAxip)
@@ -276,7 +271,7 @@ class ControlBlock(implicit p: Parameters) extends LazyModule with HasDTS {
       node.out.head._1 := io.tensor_ints_in
     }
 
-    io.usr_int <> interruptModule.module.io
+    io.usr_int <> DontCare
 
     debugAxiNode.map { node =>
       utils.connectAxi(io.m_axi.get, node.in.head._1)

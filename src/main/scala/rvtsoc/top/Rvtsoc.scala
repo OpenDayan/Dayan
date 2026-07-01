@@ -12,7 +12,7 @@ import freechips.rocketchip.jtag.JTAGIO
 
 import xs.infra.axi._
 
-import PCIeAdapter.XDMAIOBundle
+import rvtsoc.subsystem.XDMAIOBundle
 
 import rvtsoc.subsystem._
 import rvtsoc.subsystem.utils.genXbarSlvp

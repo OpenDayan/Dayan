@@ -10,9 +10,6 @@
 [submodule "deps/AxiInfra"]
 	path = deps/AxiInfra
 	url = ../AxiInfra.git
-[submodule "deps/pcie-interrupt-handler"]
-	path = deps/pcie-interrupt-handler
-	url = ../pcie-interrupt-handler
 [submodule "deps/WiredRV"]
 	path = deps/WiredRV
 	url = ../WiredRV.git

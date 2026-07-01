@@ -225,7 +225,11 @@ public:
 
   uint32_t read32(uint64_t addr) {
     uint32_t data;
-    auto bytes = *read(addr, 4);
+    auto bytes_p = read(addr, 4);
+    if (!bytes_p) {
+      return 0;
+    }
+    auto bytes = *bytes_p;
     data = bytes[0] | ((uint32_t)bytes[1] << 8) | ((uint32_t)bytes[2] << 16) |
            ((uint32_t)bytes[3] << 24);
     return data;
@@ -233,7 +237,11 @@ public:
 
   uint64_t read64(uint64_t addr) {
     uint64_t data;
-    auto bytes = *read(addr, 8);
+    auto bytes_p = read(addr, 8);
+    if (!bytes_p) {
+      return 0;
+    }
+    auto bytes = *bytes_p;
     data = bytes[0] | ((uint64_t)bytes[1] << 8) | ((uint64_t)bytes[2] << 16) |
            ((uint64_t)bytes[3] << 24) | ((uint64_t)bytes[4] << 32) |
            ((uint64_t)bytes[5] << 40) | ((uint64_t)bytes[6] << 48) |

@@ -24,7 +24,7 @@ case class XbarParams(
     controlDataBits: Int = 64,
     // 0x00_0000_0000 - 0x00_0040_0000 control
     // 0x00_0080_0000 - 0x00_00c0_0000 uram
-    // 0x00_1000_0000 - 0x10_0000_0000 mem
+    // 0x00_8000_0000 - 0x10_0000_0000 mem
 
     system_begin: Long = 0x00_0000_0000L,
     system_end: Long = 0x10_0000_0000L,
@@ -38,7 +38,7 @@ case class XbarParams(
 
     uram_tlerr_begin: Long = 0x00_00c0_0000L,
 
-    ext_mem_begin: Long = 0x00_1000_0000L,
+    ext_mem_begin: Long = 0x00_8000_0000L,
     ext_mem_end: Long = 0x10_0000_0000L,
 
     errorBase: Long = 0x3000,

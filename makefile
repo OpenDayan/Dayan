@@ -8,6 +8,11 @@ CONFIG ?= RvtsocConfig
 
 VERILOG_TOP = TestRvtsoc
 VERILOG_FPGA_TOP = RvtsocWrapper
+VERILOG_VLSI_TOP ?= Rvtsoc
+VERILOG_VLSI_DIR = $(base_dir)/generated/npu-vlsi
+VERILOG_VLSI_MEM_CONF = npu.mem.conf
+VERILOG_VLSI_MEM_GEN_CONF = .npu.mem.vlsi_mem_gen.conf
+VERILOG_VLSI_MEM_SV = npu.mem.sv
 
 SIM_C_COMPILER ?= clang
 SIM_CXX_COMPILER ?= clang++
@@ -37,6 +42,10 @@ verilog:
 
 verilog-fpga:
 	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_FPGA_TOP) -D config=$(CONFIG) gen
+
+verilog-vlsi:
+	@cd $(base_dir) && $(MILL) -D dir=$(VERILOG_VLSI_DIR) -D config=npu.config.$(CONFIG) npu.genVlsi
+	@cd $(base_dir) && ./deps/rocket-chip/scripts/vlsi_mem_gen $(VERILOG_VLSI_DIR)/npu.mem.conf -o $(VERILOG_VLSI_DIR)/npu.mem.sv
 
 verilog-clean:
 	rm -rf out/ generated/

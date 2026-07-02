@@ -21,9 +21,21 @@ object Main {
       @arg(
         name = "repl-seq-mem",
         doc = "replace sequential memory"
-      ) replSeqMem: String = "false"
+      ) replSeqMem: String = "false",
+      @arg(
+        name = "target-dir",
+        doc = "output directory relative to workspace, or absolute path"
+      ) targetDir: String = "",
+      @arg(
+        name = "repl-seq-mem-file",
+        doc = "sequential memory config output filename"
+      ) replSeqMemFile: String = ""
   ) = {
-    val output_path = os.pwd / "generated" / top
+    val output_path =
+      if (targetDir.nonEmpty) os.Path(targetDir, os.pwd)
+      else os.pwd / "generated" / top
+    val replSeqMemConfigFile =
+      if (replSeqMemFile.nonEmpty) replSeqMemFile else s"${top}.mem.conf"
     println()
     val filelist_path = output_path / "filelist.f"
     val includelist_path = output_path / "includelist.f"
@@ -47,7 +59,7 @@ object Main {
         "--preserve-values=named",
         s"-o=${output_path.toString()}"
       ) ++ (if (replSeqMem.toBoolean)
-              Array("--repl-seq-mem", s"--repl-seq-mem-file=${top}.mem.conf")
+              Array("--repl-seq-mem", s"--repl-seq-mem-file=${replSeqMemConfigFile}")
             else Array())
     )
     freechips.rocketchip.util.ElaborationArtefacts.files.foreach {

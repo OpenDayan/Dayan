@@ -170,10 +170,14 @@ object `package` extends SbtModule with ScalafmtModule {
   def genTop = Task.Input { sys.props.getOrElse("top", "") }
   def genConfig = Task.Input { sys.props.getOrElse("config", "") }
   def genReplSeqMem = Task.Input { sys.props.getOrElse("repl-seq-mem", "") }
+  def genTargetDir = Task.Input { sys.props.getOrElse("target-dir", "") }
+  def genReplSeqMemFile = Task.Input { sys.props.getOrElse("repl-seq-mem-file", "") }
   def gen = Task {
     val top = genTop()
     val config = genConfig()
     val replSeqMem = genReplSeqMem()
+    val targetDir = genTargetDir()
+    val replSeqMemFile = genReplSeqMemFile()
     if (top == "" || config == "") {
       Task.log.error(
         "Please provide output directory and config name via top and config"
@@ -186,7 +190,9 @@ object `package` extends SbtModule with ScalafmtModule {
       Map(
         "--top" -> top,
         "--config" -> config,
-        "--repl-seq-mem" -> replSeqMem
+        "--repl-seq-mem" -> replSeqMem,
+        "--target-dir" -> targetDir,
+        "--repl-seq-mem-file" -> replSeqMemFile
       )
     BuildCtx.withFilesystemCheckerDisabled {
       Jvm.callProcess(
@@ -202,6 +208,59 @@ object `package` extends SbtModule with ScalafmtModule {
       )
     }
   }
+
+  def genVlsi = Task {
+  val top = genTop()
+  val config = genConfig()
+
+  // 兼容两种写法：
+  // 1. -D target-dir=generated/vlsi
+  // 2. -D dir=generated/vlsi
+  val targetDirFromOld = genTargetDir()
+  val targetDirFromNew = sys.props.getOrElse("dir", "")
+  val targetDir =
+    if (targetDirFromOld.nonEmpty) targetDirFromOld else targetDirFromNew
+
+  // 默认输出 npu.mem.conf
+  val replSeqMemFileFromOld = genReplSeqMemFile()
+  val replSeqMemFile =
+    if (replSeqMemFileFromOld.nonEmpty) replSeqMemFileFromOld else "npu.mem.conf"
+
+  if (top == "" || config == "" || targetDir == "") {
+    Task.log.error(
+      "Please provide top, config and target-dir/dir for genVlsi"
+    )
+    sys.exit(1)
+  }
+
+  Task.log.info(s"Current config: ${config}, top: ${top}")
+  Task.log.info(s"Generating Verilog for VLSI...")
+  Task.log.info(s"Target dir: ${targetDir}")
+  Task.log.info(s"Memory conf: ${replSeqMemFile}")
+
+  val argMap =
+    Map(
+      "--top" -> top,
+      "--config" -> config,
+      "--repl-seq-mem" -> "true",
+      "--target-dir" -> targetDir,
+      "--repl-seq-mem-file" -> replSeqMemFile
+    )
+
+  BuildCtx.withFilesystemCheckerDisabled {
+    Jvm.callProcess(
+      mainClass = "rvtsoc.Main",
+      classPath = runClasspath().map(_.path),
+      mainArgs = argMap
+        .filter(kv => kv._2.nonEmpty)
+        .toSeq
+        .flatMap(kv => Seq(kv._1, kv._2)),
+      cwd = BuildCtx.workspaceRoot,
+      stdout = os.Inherit,
+      stderr = os.Inherit
+    )
+  }
+}
 
   object test extends SbtTests with TestModule.ScalaTest {
     override def mvnDeps = super.mvnDeps() ++ Seq(v.scalatest)

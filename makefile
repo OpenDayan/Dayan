@@ -4,7 +4,8 @@ MILL ?= ./mill
 CMAKE ?= cmake
 
 # Default configuration, defined in src/main/scala/rvtsoc/config/
-CONFIG ?= RvtsocConfig
+CONFIG ?= VerifRvtsocConfig
+CONFIG_FPGA = RvtsocConfig
 
 VERILOG_TOP = TestRvtsoc
 VERILOG_FPGA_TOP = RvtsocWrapper
@@ -36,7 +37,7 @@ verilog:
 	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_TOP) -D config=$(CONFIG) gen
 
 verilog-fpga:
-	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_FPGA_TOP) -D config=$(CONFIG) gen
+	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_FPGA_TOP) -D config=$(CONFIG_FPGA) gen
 
 verilog-clean:
 	rm -rf out/ generated/

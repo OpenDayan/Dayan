@@ -19,6 +19,7 @@ import freechips.rocketchip.devices.debug.{
 }
 import freechips.rocketchip.util.SystemFileName
 import freechips.rocketchip.tile.MaxHartIdBits
+import freechips.rocketchip.diplomacy.MonitorsEnabled
 
 import xs.utils.perf._
 
@@ -72,10 +73,16 @@ class BaseConfig
         new NpuROMConfig
     )
 
-class RvtsocConfig
+class VerifRvtsocConfig
     extends Config(
       new NpuCoreConfig ++
         new WiredrvConfig ++
         new RvtngConfig ++
         new BaseConfig
+    )
+
+class RvtsocConfig
+    extends Config(
+      new WithoutTLMonitors ++
+        new VerifRvtsocConfig
     )

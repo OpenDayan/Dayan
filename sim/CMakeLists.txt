@@ -79,9 +79,14 @@ if (${THREADS} STREQUAL "0")
 endif()
 message(STATUS "THREADS: ${THREADS} (Physical cores: ${PHYSICAL_CORES}, Logical cores: ${LOGICAL_CORES})")
 
-# TRACE_FST
+# TRACE
 option(TRACE_FST "Enable FST tracing" ON)
+option(TRACE_VCD "Enable VCD tracing" OFF)
+if (TRACE_FST AND TRACE_VCD)
+    message(FATAL_ERROR "TRACE_FST and TRACE_VCD cannot both be enabled")
+endif()
 message(STATUS "FST: ${TRACE_FST}")
+message(STATUS "VCD: ${TRACE_VCD}")
 
 set(VERILATE_PREFIX V${TOP_NAME})
 set(VDIR
@@ -97,6 +102,16 @@ if (TRACE_FST)
         TOP_MODULE ${TOP_NAME}
         PREFIX ${VERILATE_PREFIX}
         TRACE_FST
+        INCLUDE_DIRS ${RTL_DIR}
+        THREADS ${THREADS}
+        VERILATOR_ARGS ${V_ARGS}
+    )
+elseif (TRACE_VCD)
+    verilate(${TOP_NAME}
+        SOURCES ${V_SOURCES}
+        TOP_MODULE ${TOP_NAME}
+        PREFIX ${VERILATE_PREFIX}
+        TRACE_VCD
         INCLUDE_DIRS ${RTL_DIR}
         THREADS ${THREADS}
         VERILATOR_ARGS ${V_ARGS}

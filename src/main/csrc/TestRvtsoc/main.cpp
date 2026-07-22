@@ -1,7 +1,11 @@
 #include <laserpants/dotenv/dotenv.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <verilated.h>
+#if VM_TRACE_FST
 #include <verilated_fst_c.h>
+#elif VM_TRACE_VCD
+#include <verilated_vcd_c.h>
+#endif
 
 #include <chrono>
 #include <csignal>
@@ -28,6 +32,7 @@
 const size_t reset_cycles = 5;
 const std::filesystem::path log_path = "logs";
 const std::filesystem::path fst_log_file = log_path / "TestRvtsoc.fst";
+const std::filesystem::path vcd_log_file = log_path / "TestRvtsoc.vcd";
 
 const std::string default_ddr_config =
     "../deps/rvt/csrc/DRAMsim3/configs/DDR4_8Gb_x8_2400.ini";
@@ -38,6 +43,8 @@ std::unique_ptr<VerilatedContext> contextp = nullptr;
 std::unique_ptr<VTestRvtsoc> top = nullptr;
 #if VM_TRACE_FST
 std::shared_ptr<FstHistoryWriter> fst_writer = nullptr;
+#elif VM_TRACE_VCD
+std::shared_ptr<VerilatedVcdC> vcd_writer = nullptr;
 #endif
 std::unique_ptr<std::thread> fuse_thread;
 // static uint64_t dump_offset;
@@ -58,13 +65,21 @@ void shutdown() {
   signal(SIGSEGV, nullptr);
   logger->info("Try to Shutting down simulation...");
   is_shutting_down = true;
-#if VM_TRACE
+#if VM_TRACE_FST
   if (fst_writer) {
     logger->info("Export Trace...");
     fst_writer->dump(contextp->time() * dump_period);
     fst_writer->snapshot(fst_log_file.c_str());
     fst_writer->close();
     fst_writer = nullptr;
+  }
+#elif VM_TRACE_VCD
+  if (vcd_writer) {
+    logger->info("Export Trace...");
+    vcd_writer->dump(contextp->time() * dump_period);
+    vcd_writer->flush();
+    vcd_writer->close();
+    vcd_writer = nullptr;
   }
 #endif
   if (!FuseDriver::session_exited()) {
@@ -102,17 +117,23 @@ void run_next_cycle(uint64_t n, bool print_progress) {
       dram_time += dram_cycle;
     }
     top->eval();
-#if VM_TRACE
+#if VM_TRACE_FST
     if (enable_waveform)
       fst_writer->dump(contextp->time() * dump_period);
+#elif VM_TRACE_VCD
+    if (enable_waveform)
+      vcd_writer->dump(contextp->time() * dump_period);
 #endif
     contextp->timeInc(1);
     top->clock = 0;
     top->eval();
 
-#if VM_TRACE
+#if VM_TRACE_FST
     if (enable_waveform)
       fst_writer->dump(contextp->time() * dump_period);
+#elif VM_TRACE_VCD
+    if (enable_waveform)
+      vcd_writer->dump(contextp->time() * dump_period);
 #endif
     contextp->timeInc(1);
 
@@ -185,9 +206,13 @@ void vl_stop(const char *filename, int line, const char *func) {
 }
 
 void dump_waveform(void) {
-#if VM_TRACE
+#if VM_TRACE_FST
   fst_writer->snapshot(fst_log_file.c_str());
   start_surfer_process((char *)fst_log_file.c_str());
+#elif VM_TRACE_VCD
+  vcd_writer->dump(contextp->time() * dump_period);
+  vcd_writer->flush();
+  start_surfer_process((char *)vcd_log_file.c_str());
 #else
   logger->warn("Waveform dump is disabled. Rebuild with VM_TRACE to enable.");
 #endif
@@ -294,6 +319,10 @@ int main(int argc, char **argv) {
   fst_writer->set_time_unit("ns");
   fst_writer->set_time_resolution("100ps");
   fst_writer->open((fst_log_file.string() + ".tmp").c_str());
+#elif VM_TRACE_VCD
+  vcd_writer = std::make_shared<VerilatedVcdC>();
+  top->trace(vcd_writer.get(), 99);
+  vcd_writer->open(vcd_log_file.c_str());
 #endif
 
   top->reset = 1;

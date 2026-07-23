@@ -322,6 +322,10 @@ int main(int argc, char **argv) {
 #elif VM_TRACE_VCD
   vcd_writer = std::make_shared<VerilatedVcdC>();
   top->trace(vcd_writer.get(), 99);
+
+  vcd_writer->set_time_unit("ns");
+  vcd_writer->set_time_resolution("100ps");
+
   vcd_writer->open(vcd_log_file.c_str());
 #endif
 

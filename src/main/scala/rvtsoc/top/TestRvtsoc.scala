@@ -20,6 +20,7 @@ class TestRvtsoc(implicit p: Parameters) extends Module {
   val frontAxip = p(XbarParamsKey).frontAxip
   val extAxip = p(XbarParamsKey).extAxip
   val soc = Module(new Rvtsoc)
+  soc.suggestName("rvtsoc")
   val io = IO(new Bundle {
     val success = Output(Bool())
   })

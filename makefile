@@ -15,6 +15,23 @@ SIM_CXX_COMPILER ?= clang++
 SIM_THREADS ?= 16
 SIM_TRACE_FST ?= ON
 SIM_TRACE_VCD ?= OFF
+
+# Enabling VCD alone overrides the default FST backend. If both backends are
+# explicitly enabled, keep both ON so the mutual-exclusion check reports it.
+ifeq ($(origin SIM_TRACE_VCD),command line)
+ifeq ($(SIM_TRACE_VCD),ON)
+ifeq ($(origin SIM_TRACE_FST),file)
+SIM_TRACE_FST := OFF
+endif
+endif
+endif
+
+ifeq ($(SIM_TRACE_FST),ON)
+ifeq ($(SIM_TRACE_VCD),ON)
+$(error SIM_TRACE_FST and SIM_TRACE_VCD cannot both be ON)
+endif
+endif
+
 SIM_TOP_NAME ?= $(VERILOG_TOP)
 
 SIM_DIR = $(base_dir)/sim
@@ -45,7 +62,7 @@ verilog-clean:
 
 # simulation targets
 
-sim-config: verilog
+sim-config: verilog-fpga
 	@$(MAKE) -s sim-clean
 	@echo -e "\033[34mSIM_C_COMPILER = $(SIM_C_COMPILER)\033[0m"
 	@echo -e "\033[34mSIM_CXX_COMPILER = $(SIM_CXX_COMPILER)\033[0m"

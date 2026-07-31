@@ -12,9 +12,11 @@
 #include <cassert>
 #include <chrono>
 #include <cmath>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <queue>
 #include <span>
 #include <thread>
@@ -41,6 +43,8 @@ private:
     std::queue<std::unique_ptr<AXIUtils::Data<dataBits>>> r;
   };
   RWQueue queue;
+  std::mutex queue_mutex;
+  std::condition_variable response_cv;
 
 public:
   AXI4MasterDPI() {
@@ -68,7 +72,6 @@ public:
 
     if (beats_bytes == dataBytes && std::has_single_bit(data.size()) &&
         addr % data.size() == 0) {
-      queue.aw.push({addr, std::bit_width(data.size()) - 1});
       auto w_data_ptr = std::make_unique<AXIUtils::Data<dataBits>>();
       std::copy_n(data.begin(), data.size(), w_data_ptr->begin() + addr_offset);
       auto strb_ptr = std::make_unique<AXIUtils::Strb<dataBits / 8>>();
@@ -77,25 +80,24 @@ public:
         size_t strb_bit_idx = i % 8;
         strb_ptr->at(strb_byte_idx) |= (1ULL << strb_bit_idx);
       }
+      std::unique_lock lock(queue_mutex);
+      queue.aw.push({addr, std::bit_width(data.size()) - 1});
       queue.w.push({std::move(w_data_ptr), std::move(strb_ptr)});
 
       size_t resp_count = 0;
       while (resp_count < 1) {
-        while (queue.b.empty()) {
-          if (is_shutting_down) {
-            return -1;
-          }
-          std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
+        response_cv.wait_for(lock, std::chrono::milliseconds(10), [this] {
+          return !queue.b.empty() || is_shutting_down.load();
+        });
+        if (is_shutting_down.load())
+          return -1;
+        if (queue.b.empty())
+          continue;
         queue.b.pop();
         resp_count++;
       }
 
       return data.size();
-    }
-
-    for (size_t a = start_addr_aligned; a < end_addr_aligned; a += dataBytes) {
-      queue.aw.push({a, 6});
     }
 
     size_t written_bytes = 0;
@@ -122,24 +124,29 @@ public:
       strb[beats - 1]->at(strb_byte_idx) &= ~(1ULL << strb_bit_idx);
     }
 
+    std::unique_lock lock(queue_mutex);
+    for (size_t a = start_addr_aligned; a < end_addr_aligned; a += dataBytes) {
+      queue.aw.push({a, 6});
+    }
+
     while (written_bytes < beats_bytes) {
       auto sub_data = std::make_unique<AXIUtils::Data<dataBits>>();
       std::copy_n(span_buf.subspan(written_bytes, dataBytes).begin(), dataBytes,
                   sub_data->begin());
       queue.w.push(
           {std::move(sub_data), std::move(strb[written_bytes / dataBytes])});
-
       written_bytes += dataBytes;
     }
 
     size_t resp_count = 0;
     while (resp_count < beats) {
-      while (queue.b.empty()) {
-        if (is_shutting_down) {
-          return -1;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      }
+      response_cv.wait_for(lock, std::chrono::milliseconds(10), [this] {
+        return !queue.b.empty() || is_shutting_down.load();
+      });
+      if (is_shutting_down.load())
+        return -1;
+      if (queue.b.empty())
+        continue;
       queue.b.pop();
       resp_count++;
     }
@@ -183,12 +190,15 @@ public:
 
     if (beats_bytes == dataBytes && std::has_single_bit(size) &&
         addr % size == 0) {
+      std::unique_lock lock(queue_mutex);
       queue.ar.push({addr, std::bit_width(size) - 1});
       while (queue.r.empty()) {
-        if (is_shutting_down) {
+        response_cv.wait_for(lock, std::chrono::milliseconds(10), [this] {
+          return !queue.r.empty() || is_shutting_down.load();
+        });
+        if (is_shutting_down.load()) {
           return nullptr;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
       }
       auto r_data_ptr = std::move(queue.r.front());
       queue.r.pop();
@@ -198,23 +208,25 @@ public:
       return ptr;
     }
 
+    size_t read_bytes = 0;
+    auto buf = std::vector<uint8_t>(beats_bytes);
+    std::unique_lock lock(queue_mutex);
     for (size_t a = start_addr_aligned; a < end_addr; a += dataBytes) {
       queue.ar.push({a, std::log2(dataBytes)});
     }
-    size_t read_bytes = 0;
-    auto buf = std::vector<uint8_t>(beats_bytes);
     while (read_bytes < beats_bytes) {
       while (queue.r.empty()) {
-        if (is_shutting_down) {
+        response_cv.wait_for(lock, std::chrono::milliseconds(10), [this] {
+          return !queue.r.empty() || is_shutting_down.load();
+        });
+        if (is_shutting_down.load()) {
           return nullptr;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
       }
 
       auto r_data_ptr = std::move(queue.r.front());
       queue.r.pop();
-      buf.insert(buf.begin() + read_bytes, r_data_ptr->begin(),
-                 r_data_ptr->end());
+      std::copy_n(r_data_ptr->begin(), dataBytes, buf.begin() + read_bytes);
 
       read_bytes += dataBytes;
     }
@@ -252,6 +264,7 @@ public:
   // hw tick
   void tickAW(svBit *valid, svBit ready, int32_t *id, int64_t *addr,
               int32_t *len, int32_t *size, int32_t *burst) {
+    std::lock_guard lock(queue_mutex);
     static uint32_t id_counter = 0;
 
     static bool last_valid = false;
@@ -280,6 +293,7 @@ public:
 
   // tickW should be called after tickAW
   void tickW(svBit *valid, svBit ready, char *data, char *strb, svBit *last) {
+    std::lock_guard lock(queue_mutex);
     static bool last_valid = false;
     if (last_valid && ready) {
       logger->debug("W");
@@ -300,9 +314,11 @@ public:
   }
 
   void tickB(svBit valid, svBit *ready, int32_t id, int32_t resp) {
+    std::lock_guard lock(queue_mutex);
     static bool last_ready = false;
     if (valid && last_ready) {
       queue.b.push(uint32_t(id));
+      response_cv.notify_one();
       logger->debug("B {:d}", uint32_t(id));
     }
 
@@ -312,6 +328,7 @@ public:
 
   void tickAR(svBit *valid, svBit ready, int32_t *id, int64_t *addr,
               int32_t *len, int32_t *size, int32_t *burst) {
+    std::lock_guard lock(queue_mutex);
     static uint32_t id_counter = 0;
 
     static bool last_valid = false;
@@ -340,11 +357,13 @@ public:
 
   void tickR(svBit valid, svBit *ready, int32_t id, const char *data,
              int32_t resp, svBit last) {
+    std::lock_guard lock(queue_mutex);
     static bool last_ready = false;
     if (valid && last_ready) {
       auto r_data = std::make_unique<AXIUtils::Data<dataBits>>();
       std::copy_n((const uint8_t *)data, r_data->size(), r_data->begin());
       queue.r.push(std::move(r_data));
+      response_cv.notify_one();
 
       // std::cout << "R " << uint32_t(id) << std::endl;
       logger->debug("R {:d}", uint32_t(id));

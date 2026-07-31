@@ -41,7 +41,7 @@ std::shared_ptr<FstHistoryWriter> fst_writer = nullptr;
 #endif
 std::unique_ptr<std::thread> fuse_thread;
 // static uint64_t dump_offset;
-bool is_shutting_down = false;
+std::atomic_bool is_shutting_down = false;
 const size_t max_cycle = 100'000'000;
 
 const uint64_t bootrom_base = 0x10000;

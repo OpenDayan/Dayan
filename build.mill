@@ -208,4 +208,45 @@ object `package` extends SbtModule with ScalafmtModule {
     override def forkArgs = super.forkArgs()
     def testFramework = "org.scalatest.tools.Framework"
   }
+
+  object license extends Module {
+    private val marker = "SPDX-License-Identifier: MulanPSL-2.0"
+
+    private def scalaFiles = {
+      val src = BuildCtx.workspaceRoot / "src"
+      os.walk(src).filter(path => os.isFile(path) && path.ext == "scala")
+    }
+
+    def create() = Task.Command {
+      val headerFile = BuildCtx.workspaceRoot / "license-header.txt"
+      val header = os.read(headerFile).stripTrailing() + "\n\n"
+
+      val updated = scalaFiles.filter { path =>
+        val content = os.read(path)
+        if (content.contains(marker)) {
+          false
+        } else {
+          os.write.over(path, header + content)
+          true
+        }
+      }
+
+      Task.log.info(s"Added license header to ${updated.size} Scala files")
+    }
+
+    def check() = Task.Command {
+      val missing = scalaFiles.filterNot(path => os.read(path).contains(marker))
+
+      if (missing.nonEmpty) {
+        missing.foreach { path =>
+          Task.log.error(path.relativeTo(BuildCtx.workspaceRoot).toString)
+        }
+        throw new RuntimeException(
+          s"${missing.size} Scala files are missing license headers"
+        )
+      }
+
+      Task.log.info("All Scala files contain license headers")
+    }
+  }
 }

@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.top
+package dayan.rvtsoc.top
 
 import chisel3._
 import chisel3.experimental.BaseModule
@@ -28,12 +28,12 @@ import freechips.rocketchip.jtag.JTAGIO
 
 import xs.infra.axi._
 
-import rvtsoc.subsystem.XDMAIOBundle
+import dayan.rvtsoc.subsystem.XDMAIOBundle
 
-import rvtsoc.subsystem._
-import rvtsoc.subsystem.utils.genXbarSlvp
-import rvtsoc.blackbox
-import rvtsoc.devices._
+import dayan.rvtsoc.subsystem._
+import dayan.rvtsoc.subsystem.utils.genXbarSlvp
+import dayan.rvtsoc.blackbox
+import dayan.rvtsoc.devices._
 
 class RvtsocWrapper(implicit val p: Parameters) extends Module {
 

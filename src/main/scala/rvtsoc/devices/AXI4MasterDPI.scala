@@ -14,14 +14,14 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.devices
+package dayan.rvtsoc.devices
 
 import chisel3._
 import chisel3.util._
 
 import freechips.rocketchip.amba.axi4._
 
-import rvtsoc.utils.ExtraFiles
+import dayan.rvtsoc.utils.ExtraFiles
 
 class AXI4MasterDPIA(params: AXI4BundleParameters, name: String)
     extends HasExtModuleInline

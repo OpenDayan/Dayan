@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.top
+package dayan.rvtsoc.top
 
 import chisel3._
 import chisel3.util._
@@ -27,10 +27,10 @@ import freechips.rocketchip.amba.axi4._
 
 import xs.infra.axi.ExtAxiBundle
 
-import rvtsoc.utils.ExtraFiles
-import rvtsoc.devices._
-import rvtsoc.subsystem.XbarParamsKey
-import rvtsoc.subsystem.utils
+import dayan.rvtsoc.utils.ExtraFiles
+import dayan.rvtsoc.devices._
+import dayan.rvtsoc.subsystem.XbarParamsKey
+import dayan.rvtsoc.subsystem.utils
 
 class TestRvtsoc(implicit p: Parameters) extends Module {
   val frontAxip = p(XbarParamsKey).frontAxip

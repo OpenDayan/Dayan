@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.utils
+package dayan.rvtsoc.utils
 
 import scala.reflect.io.Path
 

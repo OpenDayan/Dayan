@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.config
+package dayan.rvtsoc.config
 
 import org.chipsalliance.cde.config._
 
@@ -39,8 +39,8 @@ import freechips.rocketchip.diplomacy.MonitorsEnabled
 
 import xs.utils.perf._
 
-import rvtsoc.devices._
-import rvtsoc.subsystem._
+import dayan.rvtsoc.devices._
+import dayan.rvtsoc.subsystem._
 
 class NpuROMConfig
     extends Config((site, here, up) => { case BootROMLocated(InSubsystem) =>

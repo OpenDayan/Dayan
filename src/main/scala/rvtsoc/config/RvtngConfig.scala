@@ -14,20 +14,20 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.config
+package dayan.rvtsoc.config
 
 import chisel3._
 import chisel3.util._
 
 import org.chipsalliance.cde.config._
 
-import rvtng.vec.VecParams
-import rvtng.neomat.MatParams
-import rvtng.dma.DMAParams
-import rvtng.bus.TLBundleParameters
-import rvtng.vpu._
+import dayan.rvtng.vec.VecParams
+import dayan.rvtng.neomat.MatParams
+import dayan.rvtng.dma.DMAParams
+import dayan.rvtng.bus.TLBundleParameters
+import dayan.rvtng.vpu._
 
-import rvtsoc.subsystem.XbarParamsKey
+import dayan.rvtsoc.subsystem.XbarParamsKey
 
 case class RvtngParams(
     // matParams: MatParams = MatParams(cM = 16, cN = 8, cK = 32), // 8T @ 1G

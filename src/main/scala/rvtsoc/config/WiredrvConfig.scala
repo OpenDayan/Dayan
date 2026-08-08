@@ -14,19 +14,19 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.config
+package dayan.rvtsoc.config
 
 import chisel3._
 import chisel3.util._
 
 import org.chipsalliance.cde.config._
 
-import wiredrv.CoreParams
+import dayan.wiredrv.CoreParams
 import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.subsystem.InSubsystem
 import freechips.rocketchip.tile.MaxHartIdBits
 
-import rvtsoc.subsystem.XbarParamsKey
+import dayan.rvtsoc.subsystem.XbarParamsKey
 
 case object WiredrvParamsKey extends Field[Option[CoreParams]](None)
 

@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.subsystem
+package dayan.rvtsoc.subsystem
 
 import scala.collection.immutable.SortedMap
 
@@ -67,7 +67,7 @@ import freechips.rocketchip.jtag._
 
 import xs.infra.axi.{AxiParams, ExtAxiBundle, AxiBundle}
 
-import rvtsoc.devices._
+import dayan.rvtsoc.devices._
 
 case object RtcPeriodKey extends Field[BigInt]
 

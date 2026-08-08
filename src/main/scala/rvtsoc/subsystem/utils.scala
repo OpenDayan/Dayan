@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.subsystem
+package dayan.rvtsoc.subsystem
 
 import chisel3._
 
@@ -27,7 +27,8 @@ import xs.infra.axi.{
   AxiParams => XsAxiParams
 }
 import xs.infra.axi.PortParams
-import rvtng.utils.PartialAssign
+import dayan.rvtng.utils.PartialAssign
+import dayan.rvtng
 
 object utils {
   def connectAXI4BundleAxiBundle(
@@ -87,7 +88,7 @@ object utils {
   def connectAxi(axi4Bundle: AXI4Bundle, axiBundle: XsAxiBundle) =
     connectAXI4BundleAxiBundle(axi4Bundle, axiBundle)
 
-  def connectAxi(axi4Bundle: AXI4Bundle, extAxiBundle: LmExtAxiBundle) {
+  def connectAxi(axi4Bundle: AXI4Bundle, extAxiBundle: LmExtAxiBundle) = {
     val axiBundle = Wire(new XsAxiBundle(extAxiBundle.params))
     axiBundle <> extAxiBundle
     connectAXI4BundleAxiBundle(axi4Bundle, axiBundle)
@@ -156,7 +157,7 @@ object utils {
       axi4Bundle: AXI4Bundle
   ) = connectAxiBundleAXI4Bundle(axiBundle, axi4Bundle)
 
-  def connectAxi(extAxiBundle: LmExtAxiBundle, axi4Bundle: AXI4Bundle) {
+  def connectAxi(extAxiBundle: LmExtAxiBundle, axi4Bundle: AXI4Bundle) = {
     val axiBundle = Wire(new XsAxiBundle(extAxiBundle.params))
     connectAxiBundleAXI4Bundle(axiBundle, axi4Bundle)
     extAxiBundle <> axiBundle

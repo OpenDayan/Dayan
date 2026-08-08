@@ -95,7 +95,7 @@ make sim -j
 可在 Scala 中通过 `ExtraFiles` 向生成的仿真附加额外的 C/C++ 源文件与包含路径：
 
 ```scala
-import rvtsoc.utils.ExtraFiles
+import dayan.rvtsoc.utils.ExtraFiles
 ExtraFiles.add("test.sv") // test.sv
 ExtraFiles.add("test.c") // test.c
 ExtraFiles.addResource("/rvtsoc/test.c") // src/main/resources/rvtsoc/test.c

@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.subsystem
+package dayan.rvtsoc.subsystem
 
 import chisel3._
 import chisel3.util._
@@ -30,7 +30,7 @@ import org.chipsalliance.cde.config.Parameters
 import org.chipsalliance.diplomacy.lazymodule._
 
 import xs.infra.axi.{ExtAxiBundle, AxiBundle => XsAxiBundle}
-import rvtsoc.subsystem.XbarParamsKey
+import dayan.rvtsoc.subsystem.XbarParamsKey
 
 import freechips.rocketchip.devices.tilelink.BootROMLocated
 import freechips.rocketchip.subsystem._
@@ -46,10 +46,10 @@ import freechips.rocketchip.diplomacy.{
 import freechips.rocketchip.devices.tilelink._
 import freechips.rocketchip.tile.MaxHartIdBits
 
-import rvtsoc.config.WiredrvParamsKey
+import dayan.rvtsoc.config.WiredrvParamsKey
 
-import rvtng.top.{RVTNGTop, TensorInst, TensorResp}
-import rvtsoc.config.RvtngParamsKey
+import dayan.rvtng.top.{RVTNGTop, TensorInst, TensorResp}
+import dayan.rvtsoc.config.RvtngParamsKey
 import freechips.rocketchip.amba.axi4.AXI4MasterNode
 import freechips.rocketchip.amba.axi4.AXI4MasterParameters
 import freechips.rocketchip.amba.axi4.AXI4MasterPortParameters
@@ -65,7 +65,7 @@ import freechips.rocketchip.tilelink.TLBuffer
 import freechips.rocketchip.tilelink.TLFIFOFixer
 import freechips.rocketchip.tilelink.TLWidthWidget
 
-import rvtsoc.blackbox
+import dayan.rvtsoc.blackbox
 
 class BaseScalarCore(implicit p: config.Parameters) extends Module {
   val maxHartIdBits = p(MaxHartIdBits)

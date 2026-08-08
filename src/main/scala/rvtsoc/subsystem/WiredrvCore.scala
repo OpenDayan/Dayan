@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.subsystem
+package dayan.rvtsoc.subsystem
 
 import chisel3._
 import chisel3.util._
@@ -23,12 +23,12 @@ import org.chipsalliance.cde.config
 import org.chipsalliance.cde.config.Parameters
 import org.chipsalliance.diplomacy.lazymodule._
 
-import wiredrv.WiredCore
-import wiredrv.CoreParams
+import dayan.wiredrv.WiredCore
+import dayan.wiredrv.CoreParams
 
 import xs.infra.axi.AxiBundle
 
-import rvtsoc.config.WiredrvParamsKey
+import dayan.rvtsoc.config.WiredrvParamsKey
 
 class WiredrvCore(implicit p: config.Parameters) extends BaseScalarCore {
 

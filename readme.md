@@ -96,7 +96,7 @@ make sim -j
 Extra C/C++ sources and include paths can be attached to the generated simulation from Scala via `ExtraFiles`:
 
 ```scala
-import rvtsoc.utils.ExtraFiles
+import dayan.rvtsoc.utils.ExtraFiles
 ExtraFiles.add("test.sv") // test.sv
 ExtraFiles.add("test.c") // test.c
 ExtraFiles.addResource("/rvtsoc/test.c") // src/main/resources/rvtsoc/test.c

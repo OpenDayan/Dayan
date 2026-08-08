@@ -190,7 +190,7 @@ object `package` extends SbtModule with ScalafmtModule {
       )
     BuildCtx.withFilesystemCheckerDisabled {
       Jvm.callProcess(
-        mainClass = "rvtsoc.Main",
+        mainClass = "dayan.rvtsoc.Main",
         classPath = runClasspath().map(_.path),
         mainArgs = argMap
           .filter(kv => kv._2.nonEmpty)

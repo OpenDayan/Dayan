@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc
+package dayan.rvtsoc
 
 import scala.io.Source
 
@@ -46,10 +46,10 @@ object Main {
 
     os.remove.all(output_path)
     val p: Parameters =
-      Class.forName("rvtsoc.config." + config).newInstance.asInstanceOf[Config]
+      Class.forName("dayan.rvtsoc.config." + config).newInstance.asInstanceOf[Config]
     ChiselStage.emitSystemVerilog(
       Class
-        .forName("rvtsoc.top." + top)
+        .forName("dayan.rvtsoc.top." + top)
         .getConstructor(classOf[Parameters])
         .newInstance(p) match {
         case m: RawModule   => m
@@ -85,11 +85,11 @@ object Main {
         .map(output_path / os.RelPath(_))
         .mkString(
           "\n"
-        ) + s"\n${rvtsoc.utils.ExtraFiles.files.mkString("\n")}\n"
+        ) + s"\n${utils.ExtraFiles.files.mkString("\n")}\n"
     )
     os.write.over(
       includelist_path,
-      s"${rvtsoc.utils.ExtraFiles.includePaths.mkString("\n")}\n"
+      s"${utils.ExtraFiles.includePaths.mkString("\n")}\n"
     )
   }
 

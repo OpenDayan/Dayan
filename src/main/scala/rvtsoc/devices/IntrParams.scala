@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.devices
+package dayan.rvtsoc.devices
 
 import org.chipsalliance.cde.config._
 

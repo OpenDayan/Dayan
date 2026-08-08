@@ -14,7 +14,7 @@
  * See the Mulan PSL v2 for more details.
  */
 
-package rvtsoc.devices
+package dayan.rvtsoc.devices
 
 import chisel3._
 import chisel3.util._
@@ -22,7 +22,7 @@ import chisel3.util._
 import freechips.rocketchip.amba.axi4._
 import chisel3.SpecifiedDirection.Flip
 
-import rvtsoc.utils.ExtraFiles
+import dayan.rvtsoc.utils.ExtraFiles
 
 class AXI4SlaveDPIAWW(params: AXI4BundleParameters) extends HasExtModuleInline {
   val clock = IO(Input(Clock()))
@@ -333,9 +333,9 @@ class AXI4SlaveDPI(params: AXI4BundleParameters) extends Module {
   ExtraFiles.addIncludePath("src/main/csrc")
 }
 
-import rvtng.bus.DPIAXI4
-import rvtng.bus.{AXI4BundleParameters => RVTNGAXI4BundleParameters}
-import rvtng.utils.PartialAssign
+import dayan.rvtng.bus.DPIAXI4
+import dayan.rvtng.bus.{AXI4BundleParameters => RVTNGAXI4BundleParameters}
+import dayan.rvtng.utils.PartialAssign
 
 class AXI4SlaveDPILegacy(params: AXI4BundleParameters) extends Module {
   val axi = IO(Flipped(new AXI4Bundle(params)))

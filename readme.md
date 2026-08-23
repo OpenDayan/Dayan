@@ -14,7 +14,9 @@ Dayan is a heterogeneous NPU. Each Dayan NPU core pairs a scalar core (for contr
 
 The micro-architecture overview of the Dayan SoC is shown below.
 
-![dayan-arch](images/dayan-arch.png)
+![rvtng-architecture](images/rvtng-architecture.svg)
+
+For more documentation, see the [Dayan-Doc](https://github.com/OpenDayan/Dayan-Doc) repository.
 
 ## Sub-directories Overview
 

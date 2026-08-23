@@ -13,7 +13,9 @@ English Readme is [here](readme.md).
 大衍是一款异构 NPU。每个 Dayan NPU 核由一个标量核（负责控制流与指令发射）和一个张量核（负责矩阵、向量与 DMA 计算）组成。SoC 对外提供一个前向（slave）AXI 端口供主机下发任务，以及一个主（master）AXI 端口访问外部存储；片上系统总线在各个核、控制块与外部世界之间路由数据。
 
 大衍 SoC 微架构概览：
-![dayan-arch](images/dayan-arch.png)
+![rvtng-architecture](images/rvtng-architecture.svg)
+
+更多文档请见 [Dayan-Doc](https://github.com/OpenDayan/Dayan-Doc) 仓库。
 
 ## 目录概览
 

@@ -17,6 +17,7 @@
 package dayan.rvtsoc
 
 import scala.io.Source
+import scala.sys.process._
 
 import chisel3._
 import _root_.circt.stage.ChiselStage
@@ -37,14 +38,25 @@ object Main {
       @arg(
         name = "repl-seq-mem",
         doc = "replace sequential memory"
-      ) replSeqMem: String = "false"
+      ) replSeqMem: String = "false",
+      @arg(
+        name = "dis-verif",
+        doc = "disable verification files"
+      ) disVerif: String = "false",
+      @arg(
+        name = "abs-path",
+        doc = "absolute path for filelist"
+      ) absPath: String = "false"
   ) = {
-    val output_path = os.pwd / "generated" / top
-    println()
-    val filelist_path = output_path / "filelist.f"
-    val includelist_path = output_path / "includelist.f"
+    val outputPath = os.pwd / "generated" / s"$top-$config"
+    val filelistPath = outputPath / "filelist.f"
+    val includelistPath = outputPath / "includelist.f"
+    val infoPath = outputPath / "info"
+    val configNamePath = infoPath / "config.txt"
+    val versionPath = infoPath / "version.txt"
+    val absPathBoolean = absPath.toBoolean
 
-    os.remove.all(output_path)
+    os.remove.all(outputPath)
     val p: Parameters =
       Class.forName("dayan.rvtsoc.config." + config).newInstance.asInstanceOf[Config]
     ChiselStage.emitSystemVerilog(
@@ -59,38 +71,80 @@ object Main {
         "--disable-annotation-unknown",
         "--strip-debug-info",
         "--preserve-aggregate=vec",
+        "--emit-separate-always-blocks",
         "--split-verilog",
         "--preserve-values=named",
-        s"-o=${output_path.toString()}"
-      ) ++ (if (replSeqMem.toBoolean)
-              Array("--repl-seq-mem", s"--repl-seq-mem-file=${top}.mem.conf")
-            else Array())
+        s"-o=${outputPath.toString()}"
+      ) ++
+        (if (replSeqMem.toBoolean)
+           Array(
+             "--repl-seq-mem",
+             s"--repl-seq-mem-file=${infoPath / "mem.conf"}"
+           )
+         else Array()) ++
+        (if (disVerif.toBoolean)
+           Array("-disable-layers=Verification")
+         else Array())
     )
+    os.makeDir(infoPath)
     freechips.rocketchip.util.ElaborationArtefacts.files.foreach {
       case (ext, contents) =>
         os.write.over(
-          output_path / s"${top}.${ext}",
+          infoPath / s"${ext}",
           contents()
         )
     }
 
     // Generated XS Files
-    FileRegisters.write(output_path.toString(), top)
+    FileRegisters.write(outputPath.toString(), top)
 
+    os.makeDir(outputPath / "wrappers")
     os.write.over(
-      filelist_path,
-      os.read(filelist_path)
+      filelistPath,
+      (os
+        .read(filelistPath)
         .linesIterator
         .filter(_.nonEmpty)
-        .map(output_path / os.RelPath(_))
-        .mkString(
-          "\n"
-        ) + s"\n${utils.ExtraFiles.files.mkString("\n")}\n"
+        .map { _name =>
+          val name = os.RelPath(_name)
+          if (
+            name.toString().startsWith("GENERIC_RAM_") ||
+            name.toString().startsWith("sram_array_") ||
+            name.toString() == "EICG_wrapper.v"
+          ) {
+            os.move(outputPath / name, outputPath / "wrappers" / name)
+            s"wrappers/$name"
+          } else name.toString()
+        }
+        ++ utils.ExtraFiles.files
+          .map(name => s"../../$name"))
+        .map(name =>
+          if (absPathBoolean) (outputPath / os.RelPath(name)).toString()
+          else name
+        )
+        .mkString("\n")
     )
     os.write.over(
-      includelist_path,
-      s"${utils.ExtraFiles.includePaths.mkString("\n")}\n"
+      includelistPath,
+      s"${utils.ExtraFiles.includePaths
+          .map(name => s"../../$name")
+          .map(name =>
+            if (absPathBoolean) (outputPath / os.RelPath(name)).toString()
+            else name
+          )
+          .mkString("\n")}\n"
     )
+    os.write.over(
+      configNamePath,
+      s"$config\n"
+    )
+
+    val gitStr = try {
+      "git describe --tags --always --dirty --abbrev=40".!!.trim
+    } catch {
+      case _: Exception => "unknown"
+    }
+    os.write.over(versionPath, s"$gitStr\n")
   }
 
   def main(args: Array[String]): Unit = ParserForMethods(this).runOrExit(args)

@@ -15,6 +15,7 @@ SIM_CXX_COMPILER ?= clang++
 SIM_THREADS ?= 16
 SIM_TRACE_FST ?= ON
 SIM_TOP_NAME ?= $(VERILOG_TOP)
+SIM_CONFIG ?= VerifRvtsocConfig
 
 SIM_DIR = $(base_dir)/sim
 SIM_BUILD_DIR = $(SIM_DIR)/build
@@ -34,10 +35,10 @@ test:
 # verilog targets
 
 verilog:
-	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_TOP) -D config=$(CONFIG) gen
+	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_TOP) -D config=$(CONFIG) -D abs-path=true gen
 
 verilog-fpga:
-	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_FPGA_TOP) -D config=$(CONFIG_FPGA) gen
+	@cd $(base_dir) && $(MILL) $(JAVA_OPTS) -D top=$(VERILOG_FPGA_TOP) -D config=$(CONFIG_FPGA) -D dis-verif=true gen
 
 verilog-clean:
 	rm -rf out/ generated/
@@ -48,6 +49,7 @@ sim-config: verilog
 	@$(MAKE) -s sim-clean
 	@echo -e "\033[34mSIM_C_COMPILER = $(SIM_C_COMPILER)\033[0m"
 	@echo -e "\033[34mSIM_CXX_COMPILER = $(SIM_CXX_COMPILER)\033[0m"
+	@echo -e "\033[34mSIM_CONFIG = $(SIM_CONFIG)\033[0m"
 	@echo -e "\033[34mSIM_THREADS = $(SIM_THREADS)\033[0m"
 	@echo -e "\033[34mSIM_TRACE_FST = $(SIM_TRACE_FST)\033[0m"
 	@echo -e "\033[34mSIM_TOP_NAME = $(SIM_TOP_NAME)\033[0m"
@@ -56,7 +58,8 @@ sim-config: verilog
 		-DCMAKE_CXX_COMPILER=$(SIM_CXX_COMPILER) \
 		-DTHREADS=$(SIM_THREADS) \
 		-DTRACE_FST=$(SIM_TRACE_FST) \
-		-DTOP_NAME=$(SIM_TOP_NAME)
+		-DTOP_NAME=$(SIM_TOP_NAME) \
+		-DCONFIG_NAME=$(SIM_CONFIG)
 	@ln -f -s $(SIM_BUILD_DIR)/compile_commands.json $(base_dir)/compile_commands.json
 
 sim-build: verilog

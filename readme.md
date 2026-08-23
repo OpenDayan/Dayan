@@ -53,9 +53,9 @@ make deps
 
 ## Generate Verilog
 
-* Run `make` (the default target is `verilog`) to generate SystemVerilog for simulation. Output is written to `generated/TestRvtsoc/`.
-* Run `make verilog-fpga` to generate the FPGA wrapper `RvtsocWrapper` instead. Output is written to `generated/RvtsocWrapper/`.
-* Refer to `makefile` and `build.mill` for the available `CONFIG` / top-module options.
+* Run `make` (the default target is `verilog`) to generate SystemVerilog for simulation. Output is written to `generated/${VERILOG_TOP}-${CONFIG}/`, i.e. `generated/TestRvtsoc-VerifRvtsocConfig/`. Wrapper submodules (sequential RAMs, `EICG_wrapper`) are moved into a `wrappers/` subdirectory, and generation metadata (`config.txt`, `version.txt`, and, when enabled, `mem.conf`) is written under `generated/<top>-<config>/info/`.
+* Run `make verilog-fpga` to generate the FPGA wrapper `RvtsocWrapper` instead. It disables the verification logic (`-D dis-verif=true`) and writes to `generated/RvtsocWrapper-RvtsocConfig/`.
+* Refer to `makefile` and `build.mill` for the available `CONFIG` / top-module options. `make verilog` passes `-D abs-path=true` so paths in the generated filelist are absolute.
 
 ## Run Programs by Simulation
 
@@ -78,9 +78,10 @@ make deps
   | `SIM_THREADS`      | `16`           | Number of threads passed to Verilator              |
   | `SIM_TRACE_FST`    | `ON`           | Toggle FST waveform tracing                        |
   | `SIM_TOP_NAME`     | `TestRvtsoc`   | Top-level module to simulate                       |
+  | `SIM_CONFIG`        | `VerifRvtsocConfig` | CDE config passed to CMake; must match `CONFIG` so the RTL is loaded from `generated/<top>-<config>/` |
 
 * `make sim -j` builds the simulator and runs it.
-* The compiled executable is `sim/build/TestRvtsoc`; waveform files are written to `sim/logs/*.fst`.
+* The compiled executable is `sim/build/TestRvtsoc`; waveform files are written to `sim/logs/*.fst`. Set `SIM_CONFIG` to the config used for RTL generation (defaults to `VerifRvtsocConfig`) so CMake finds the generated RTL.
 
 Example:
 

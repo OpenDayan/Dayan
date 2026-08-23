@@ -23,22 +23,26 @@ object ExtraFiles {
   var includePaths: Seq[String] = Nil
 
   def add(filename: String): Unit = {
-    files = Path(filename).toAbsolute.toString +: files
+    files = Path(filename).toString +: files
   }
 
   def addResource(filename: String): Unit = {
-    files = getClass.getResource(filename).getPath +: files
+    val path = getClass.getResource(filename).getPath
+    if (!files.contains(path)) files = path +: files
   }
 
   def addIncludePath(path: String): Unit = {
-    includePaths = Path(path).toAbsolute.toString +: includePaths
+    includePaths = Path(path).toString +: includePaths
   }
 
   def addResourceIncludePath(path: String): Unit = {
-    includePaths = getClass.getResource(path).getPath +: includePaths
+    val resourcePath = getClass.getResource(path).getPath
+    if (!includePaths.contains(resourcePath)) {
+      includePaths = resourcePath +: includePaths
+    }
   }
 
   def contains(filename: String): Boolean = {
-    files.foldLeft(false)((t, s) => { s == filename | t })
+    files.contains(Path(filename).toAbsolute.toString)
   }
 }

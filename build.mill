@@ -170,23 +170,29 @@ object `package` extends SbtModule with ScalafmtModule {
   def genTop = Task.Input { sys.props.getOrElse("top", "") }
   def genConfig = Task.Input { sys.props.getOrElse("config", "") }
   def genReplSeqMem = Task.Input { sys.props.getOrElse("repl-seq-mem", "") }
+  def genDisVerif = Task.Input { sys.props.getOrElse("dis-verif", "") }
+  def genAbsPath = Task.Input { sys.props.getOrElse("abs-path", "") }
   def gen = Task {
     val top = genTop()
     val config = genConfig()
     val replSeqMem = genReplSeqMem()
+    val disVerif = genDisVerif()
+    val absPath = genAbsPath()
     if (top == "" || config == "") {
       Task.log.error(
         "Please provide output directory and config name via top and config"
       )
       sys.exit(1)
     }
-    Task.log.info(s"Current config: ${config}, top: ${top}")
-    Task.log.info(s"Generating Verilog...")
+    Task.log.info(s"[${top}] config: ${config}")
+    Task.log.info(s"[${top}] Generating Verilog...")
     val argMap =
       Map(
         "--top" -> top,
         "--config" -> config,
-        "--repl-seq-mem" -> replSeqMem
+        "--repl-seq-mem" -> replSeqMem,
+        "--dis-verif" -> disVerif,
+        "--abs-path" -> absPath,
       )
     BuildCtx.withFilesystemCheckerDisabled {
       Jvm.callProcess(

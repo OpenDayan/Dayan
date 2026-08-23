@@ -52,9 +52,9 @@ make deps
 
 ## 生成 Verilog
 
-* 运行 `make`（默认目标为 `verilog`）以生成用于仿真的 SystemVerilog 代码，输出位于 `generated/TestRvtsoc/`。
-* 运行 `make verilog-fpga` 以生成 FPGA 使用的 `RvtsocWrapper` 顶层，输出位于 `generated/RvtsocWrapper/`。
-* 可用的 `CONFIG` / 顶层模块选项详见 `makefile` 与 `build.mill`。
+* 运行 `make`（默认目标为 `verilog`）以生成用于仿真的 SystemVerilog 代码，输出位于 `generated/${VERILOG_TOP}-${CONFIG}/`，即 `generated/TestRvtsoc-VerifRvtsocConfig/`。其中的封装子模块（时序 RAM、`EICG_wrapper`）会被移动到 `wrappers/` 子目录，生成元数据（`config.txt`、`version.txt`，以及启用时可获得的 `mem.conf`）写入 `generated/<top>-<config>/info/`。
+* 可用的 `CONFIG` / 顶层模块选项详见 `makefile` 与 `build.mill`。`make verilog` 会传入 `-D abs-path=true` 使生成的 filelist 使用绝对路径。
+* 运行 `make verilog-fpga` 以生成 FPGA 使用的 `RvtsocWrapper` 顶层，它会关闭验证逻辑（`-D dis-verif=true`），输出位于 `generated/RvtsocWrapper-RvtsocConfig/`。
 
 ## 仿真运行
 
@@ -77,9 +77,10 @@ make deps
   | `SIM_THREADS`      | `16`             | 传入 Verilator 的线程数            |
   | `SIM_TRACE_FST`    | `ON`             | 是否开启 FST 波形                  |
   | `SIM_TOP_NAME`     | `TestRvtsoc`     | 待仿真的顶层模块                   |
+  | `SIM_CONFIG`       | `VerifRvtsocConfig` | 传给 CMake 的 CDE 配置，需与 `CONFIG` 一致以保证从 `generated/<top>-<config>/` 加载 RTL |
 
 * 运行 `make sim -j` 构建并运行仿真器。
-* 编译产物为 `sim/build/TestRvtsoc`，波形文件输出到 `sim/logs/*.fst`。
+* 编译产物为 `sim/build/TestRvtsoc`，波形文件输出到 `sim/logs/*.fst`。请将 `SIM_CONFIG` 设为生成 RTL 所用的配置（默认 `VerifRvtsocConfig`），以便 CMake 找到生成的 RTL。
 
 运行示例：
 

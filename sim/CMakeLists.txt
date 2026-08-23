@@ -22,7 +22,9 @@ find_package(ZLIB REQUIRED)
 
 set(TOP_NAME "TestRvtsoc" CACHE STRING "Top module")
 message(STATUS "TOP_NAME: ${TOP_NAME}")
-set(RTL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../generated/${TOP_NAME})
+set(CONFIG_NAME "VerifRvtsocConfig" CACHE STRING "Configuration name")
+message(STATUS "CONFIG_NAME: ${CONFIG_NAME}")
+set(RTL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../generated/${TOP_NAME}-${CONFIG_NAME})
 set(VERILOG_FILELIST ${RTL_DIR}/filelist.f)
 set(INCLUDELIST ${RTL_DIR}/includelist.f)
 # reconfigure when filelist.f changes

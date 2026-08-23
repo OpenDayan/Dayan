@@ -12,6 +12,8 @@ Dayan is licensed under the [Mulan Permissive Software License, Version 2](http:
 
 Dayan is a heterogeneous NPU. Each Dayan NPU core pairs a scalar core (for control flow and instruction issue) with a tensor core (for matrix, vector and DMA computation). The SoC exposes a front (slave) AXI port for the host to push work and a master AXI port to reach external memory, while an internal system crossbar routes traffic between the cores, the control block and the outside world.
 
+The scalar core ([WiredRV](https://github.com/OpenDayan/WiredRV)) and the tensor core ([Dayan-Core](https://github.com/OpenDayan/Dayan-Core)) are developed in standalone repositories and pulled in as submodules.
+
 The micro-architecture overview of the Dayan SoC is shown below.
 
 ![rvtng-architecture](images/rvtng-architecture.svg)
